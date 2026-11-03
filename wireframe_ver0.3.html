@@ -1,79 +1,236 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#6652f5">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#292929">
 <title>편입 준비 한눈에</title>
 <style>
-:root{--ink:#242424;--muted:#777;--line:#dedede;--paper:#fff;--bg:#f4f4f4;--soft:#f0f0f0;--accent:#292929}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif}
-button,input,select{font:inherit}button{cursor:pointer}
-.app{max-width:560px;min-height:100vh;margin:auto;background:var(--paper);box-shadow:0 0 28px #0000000b;padding-bottom:78px}
-header{padding:18px 20px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#ffffffed;backdrop-filter:blur(10px);z-index:5}
-.brand{font-weight:800;font-size:17px;display:flex;gap:9px;align-items:center}.cap{width:28px;height:28px;border-radius:8px;background:#292929;color:white;display:grid;place-items:center}
-.header-note{font-size:11px;color:var(--muted)}
-main{padding:22px 18px 28px}.eyebrow{font-size:11px;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:8px}
-h1{font-size:25px;line-height:1.35;margin:0 0 8px}h2{font-size:20px;margin:0 0 7px}h3{font-size:15px;margin:0 0 8px}
-p{line-height:1.65}.sub{color:var(--muted);font-size:13px;margin:0 0 20px}
-.hero{background:#f0f0f0;border-radius:18px;padding:22px;margin:6px 0 18px}.hero p{font-size:14px;margin:0 0 17px;color:#555}
-.btn{border:1px solid #333;border-radius:9px;padding:12px 15px;background:#292929;color:white;font-weight:700;width:100%;min-height:46px}
-.btn.secondary{background:white;color:#292929;border-color:#bdbdbd}.btn.ghost{background:#f1f1f1;color:#333;border-color:#ddd}.btn.small{width:auto;min-height:36px;padding:7px 11px;font-size:12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tile,.card{border:1px solid var(--line);border-radius:12px;padding:15px;background:white}.tile{display:flex;flex-direction:column;gap:7px;text-align:left;min-height:100px}.tile b{font-size:14px}.tile span{font-size:12px;color:var(--muted)}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}.stat{padding:14px;border-radius:12px;background:#f5f5f5}.stat strong{font-size:22px;display:block}.stat span{font-size:12px;color:var(--muted)}
-.progress{height:9px;background:#e5e5e5;border-radius:20px;overflow:hidden;margin:9px 0}.progress i{display:block;height:100%;background:#333;border-radius:20px;transition:width .2s}
-.section-head{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px}
-label{display:block;font-size:13px;font-weight:700;margin:15px 0 7px}select,input[type=text]{width:100%;padding:12px;border:1px solid #c9c9c9;border-radius:8px;background:white;color:#222;min-height:46px}
-.form-hint{font-size:12px;color:var(--muted);margin:6px 0 0}.actions{display:flex;gap:9px;margin-top:18px}.actions>*{flex:1}
-.step{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:0 0 8px}
-.item{border:1px solid var(--line);border-radius:12px;padding:15px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;gap:10px}.item p{font-size:12px;color:var(--muted);margin:4px 0 0}.arrow{font-size:22px;color:#777}
-.info{background:#f1f1f1;border-radius:10px;padding:14px;font-size:12px;line-height:1.7;color:#555;margin:14px 0}
-.status{display:inline-block;border-radius:20px;background:#eee;padding:5px 9px;font-size:11px;color:#555;margin:4px 0 8px}
-.check-row{display:flex;align-items:flex-start;gap:12px;padding:14px 3px;border-bottom:1px solid var(--line);font-size:14px}.check-row input{width:20px;height:20px;accent-color:#292929;flex:none;margin:0}.check-row small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
-.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(560px,100%);display:grid;grid-template-columns:repeat(4,1fr);background:#fffffff2;border-top:1px solid var(--line);padding:8px 5px calc(8px + env(safe-area-inset-bottom));z-index:6;backdrop-filter:blur(10px)}
-.nav{border:0;background:transparent;color:#888;font-size:11px;padding:5px 2px;display:flex;align-items:center;flex-direction:column;gap:3px}.nav b{font-size:19px;font-weight:500}.nav.active{color:#222;font-weight:800}
-.back{border:0;background:transparent;font-size:22px;padding:0 8px 0 0}.topline{display:flex;align-items:center;margin-bottom:17px}.topline h2{flex:1;margin:0}
-.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#222;color:white;padding:10px 15px;border-radius:30px;font-size:12px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10;white-space:nowrap}.toast.show{opacity:1}
-footer{padding:0 18px 20px;color:#999;font-size:10px;text-align:center}
-@media(min-width:700px){body{padding:24px 0}.app{border-radius:18px;overflow:hidden;min-height:calc(100vh - 48px)}header{padding-left:24px;padding-right:24px}main{padding:28px 24px 36px}.bottom{bottom:24px;border-radius:0 0 18px 18px}}
+:root {
+  --ink: #222222;
+  --muted: #777777;
+  --line: #e2e2e2;
+  --paper: #ffffff;
+  --bg: #f4f4f4;
+  --soft: #f8f8f8;
+  --accent: #111111;
+}
 
-/* Purple visual refresh */
-:root{--ink:#20203a;--muted:#777791;--line:#e8e6f5;--paper:#fff;--bg:#f3f1fb;--soft:#f0edff;--accent:#6652f5}
-body{background:linear-gradient(180deg,#efedfa 0%,#f8f7fc 48%,#f1effa 100%);color:var(--ink)}
-.app{background:#f8f7fc;box-shadow:0 18px 55px rgba(65,49,160,.09)}
-header{background:rgba(255,255,255,.92);border-bottom:1px solid #e9e6f7}
-.brand{color:#24213d}.cap{background:linear-gradient(145deg,#8876ff,#5941e8);box-shadow:0 5px 12px rgba(102,82,245,.22)}
-.header-note{color:#85839e}main{padding-top:25px}.eyebrow{color:#8078b4}
-h1{letter-spacing:-.045em;color:#211e3b}h2,h3{letter-spacing:-.025em;color:#282541}
-.sub{color:#77758f}
-.hero{background:linear-gradient(135deg,#eeeaff 0%,#f7f4ff 55%,#e7e2ff 100%);border:1px solid #e3ddff;border-radius:22px;padding:22px;box-shadow:0 10px 26px rgba(93,75,190,.08)}
-.hero p{color:#696783}
-.btn{border:0;border-radius:13px;background:linear-gradient(110deg,#7662ff,#5b45ee);color:white;box-shadow:0 8px 18px rgba(102,82,245,.22);transition:transform .15s,filter .15s}
-.btn:active{transform:translateY(1px);filter:brightness(.96)}
-.btn.secondary{background:#fff;color:#5b4be1;border:1px solid #dcd6ff;box-shadow:none}
-.btn.ghost{background:#f0edff;color:#5748d5;border:1px solid #e3ddff;box-shadow:none}
-.tile,.card{border:1px solid #eeecf7;border-radius:17px;background:#fff;box-shadow:0 7px 20px rgba(53,43,120,.055)}
-.tile{min-height:108px;padding:17px;transition:transform .15s,border-color .15s}
-.tile:active{transform:scale(.985);border-color:#9c8fff}
-.tile b{color:#302c55}.tile span{color:#85829e}
-.stats{gap:12px}.stat{background:linear-gradient(145deg,#f1efff,#fff);border:1px solid #ebe7ff;border-radius:16px}
-.stat strong{color:#5e4ce9}.progress{background:#e9e6f4;height:9px}.progress i{background:linear-gradient(90deg,#8b79ff,#5c47ef)}
-.section-head{margin-top:25px}label{color:#45415f}
-select,input[type=text]{border:1px solid #e3e0f0;border-radius:12px;background:#fff;color:#292640;min-height:49px;transition:border-color .15s,box-shadow .15s}
-select:focus,input[type=text]:focus{outline:none;border-color:#8878ff;box-shadow:0 0 0 3px rgba(119,99,255,.13)}
-.form-hint{color:#8986a0}
-.item{border:1px solid #eae7f5;border-radius:15px;background:#fff;box-shadow:0 5px 15px rgba(53,43,120,.04);padding:17px}
-.item:active{border-color:#a69aff;background:#faf9ff}
-.item p{color:#85829b}.arrow{color:#7868e9}
-.info{background:#f0edff;border:1px solid #e5e0ff;color:#625d83;border-radius:13px}
-.status{background:#eeeaff;color:#5e4bdc;font-weight:700}
-.check-row{border-bottom-color:#eeebf5}.check-row input{accent-color:#6652f5}
-.bottom{background:rgba(255,255,255,.95);border-top:1px solid #e9e6f4;box-shadow:0 -8px 25px rgba(45,37,100,.045)}
-.nav{color:#9693aa}.nav.active{color:#604cf0}.nav.active b{background:#efedff;border-radius:9px;padding:0 9px}
-.back{color:#6251df}.toast{background:#282442;box-shadow:0 8px 24px rgba(30,25,70,.2)}
-footer{color:#9290a6}
-@media(min-width:700px){body{padding:24px 0}.app{border-radius:22px;overflow:hidden;min-height:calc(100vh - 48px)}}
+* { box-sizing: border-box; }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Noto Sans KR", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  justify-content: center;
+}
+
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+
+.app {
+  width: 100%;
+  max-width: 430px; /* 아이폰/갤럭시 표준 모바일 폭 */
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--paper);
+  padding-bottom: calc(78px + env(safe-area-inset-bottom));
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+  position: relative;
+}
+
+header {
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 5;
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cap {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--accent);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+}
+
+.header-note { font-size: 11px; color: var(--muted); font-weight: 600; }
+
+main { padding: 20px 16px 24px; }
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: .1em;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+h1 { font-size: 22px; line-height: 1.35; margin: 0 0 8px; letter-spacing: -0.03em; font-weight: 800; }
+h2 { font-size: 18px; margin: 0 0 6px; letter-spacing: -0.02em; font-weight: 700; }
+h3 { font-size: 15px; margin: 0 0 6px; font-weight: 700; }
+p { line-height: 1.55; margin: 0; }
+.sub { color: var(--muted); font-size: 13px; margin: 0 0 18px; line-height: 1.45; }
+
+.hero {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  margin: 6px 0 16px;
+}
+.hero p { font-size: 13px; margin: 0 0 14px; color: #555; }
+
+.btn {
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.btn:active { opacity: 0.85; }
+.btn.secondary { background: white; color: var(--ink); border-color: #cccccc; }
+.btn.ghost { background: var(--soft); color: #333; border-color: var(--line); }
+.btn.small { width: auto; min-height: 34px; padding: 6px 12px; font-size: 12px; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile, .card { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: white; }
+.tile { display: flex; flex-direction: column; justify-content: space-between; gap: 6px; text-align: left; min-height: 96px; width: 100%; border: 1px solid var(--line); }
+.tile b { font-size: 13px; color: var(--ink); }
+.tile span { font-size: 11px; color: var(--muted); }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.stat { padding: 12px; border-radius: 12px; background: var(--soft); border: 1px solid var(--line); }
+.stat strong { font-size: 20px; display: block; color: var(--ink); }
+.stat span { font-size: 11px; color: var(--muted); }
+
+.progress { height: 7px; background: #e5e5e5; border-radius: 20px; overflow: hidden; margin: 8px 0; }
+.progress i { display: block; height: 100%; background: var(--accent); border-radius: 20px; transition: width .2s; }
+
+.section-head { display: flex; align-items: center; justify-content: space-between; margin: 20px 0 10px; }
+
+label { display: block; font-size: 13px; font-weight: 700; margin: 14px 0 6px; }
+select, input[type=text] {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  background: white;
+  color: #222;
+  min-height: 44px;
+  font-size: 14px;
+}
+select:focus, input[type=text]:focus { outline: none; border-color: var(--accent); }
+
+.form-hint { font-size: 11px; color: var(--muted); margin: 6px 0 0; line-height: 1.4; }
+.actions { display: flex; gap: 8px; margin-top: 18px; }
+.actions > * { flex: 1; }
+
+.step { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin: 0 0 8px; }
+.item {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  margin: 8px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: white;
+}
+.item p { font-size: 12px; color: var(--muted); margin: 3px 0 0; }
+.arrow { font-size: 18px; color: #777; }
+
+.info { background: var(--soft); border: 1px solid var(--line); border-radius: 10px; padding: 12px; font-size: 12px; line-height: 1.55; color: #555; margin: 12px 0; }
+.status { display: inline-block; border-radius: 20px; background: var(--soft); border: 1px solid var(--line); padding: 4px 9px; font-size: 11px; color: #555; margin: 4px 0 8px; font-weight: 600; }
+.check-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 2px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.check-row input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; margin: 1px 0 0; }
+.check-row small { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; }
+
+.bottom {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(430px, 100%);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid var(--line);
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  z-index: 6;
+  backdrop-filter: blur(10px);
+}
+
+.nav {
+  border: 0;
+  background: transparent;
+  color: #888888;
+  font-size: 10px;
+  padding: 4px 2px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 2px;
+}
+.nav b { font-size: 17px; font-weight: 500; }
+.nav.active { color: var(--accent); font-weight: 800; }
+
+.back { border: 0; background: transparent; font-size: 20px; padding: 0 6px 0 0; }
+.topline { display: flex; align-items: center; margin-bottom: 14px; }
+.topline h2 { flex: 1; margin: 0; font-size: 18px; }
+
+.toast {
+  position: fixed;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  background: #222222;
+  color: white;
+  padding: 9px 16px;
+  border-radius: 30px;
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+  z-index: 10;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+
+footer { padding: 0 16px 20px; color: #999999; font-size: 10px; text-align: center; }
 </style>
 </head>
 <body>
@@ -118,16 +275,16 @@ function render(){
  if(page==='profile')el.innerHTML=profile();
 }
 function home(){return `<div class="eyebrow">TRANSFER PREPARATION · DASHBOARD</div><h1>편입 준비,<br>한눈에 확인하세요.</h1><p class="sub">목표 대학의 준비 조건부터 체크리스트까지 차근차근 관리할 수 있어요.</p>
-<div class="hero"><h2>나에게 맞는 편입 준비 시작하기</h2><p>대학과 전형 조건을 선택하면 필요한 준비사항을 한곳에서 확인할 수 있습니다.</p><button class="btn" onclick="setPage('search')">편입 준비 시작하기　→</button></div>
+<div class="hero"><h2>나에게 맞는 편입 준비 시작하기</h2><p>대학과 전형 조건을 선택하면 필요한 준비사항을 한곳에서 확인할 수 있습니다.</p><button class="btn" onclick="setPage('search')">편입 준비 시작하기 →</button></div>
 <div class="stats"><div class="stat"><strong>${progress()}%</strong><span>준비 체크 진행률</span><div class="progress"><i style="width:${progress()}%"></i></div></div><div class="stat"><strong>${state.university?esc(state.university):'미선택'}</strong><span>선택한 목표 대학</span></div></div>
 <div class="section-head"><h3>바로가기</h3><span class="header-note">QUICK MENU</span></div><div class="grid">
-<button class="tile" onclick="setPage('detail');detailIndex=0"><b>지원 자격·학점</b><span>지원 조건 확인하기　→</span></button>
-<button class="tile" onclick="setPage('detail');detailIndex=1"><b>시험 과목·범위</b><span>시험 정보 확인하기　→</span></button>
-<button class="tile" onclick="setPage('detail');detailIndex=2"><b>어학·자격증</b><span>인증 기준 확인하기　→</span></button>
-<button class="tile" onclick="setPage('detail');detailIndex=3"><b>제출 서류·일정</b><span>준비 일정 확인하기　→</span></button></div>
+<button class="tile" onclick="setPage('detail');detailIndex=0"><b>지원 자격·학점</b><span>지원 조건 확인하기 →</span></button>
+<button class="tile" onclick="setPage('detail');detailIndex=1"><b>시험 과목·범위</b><span>시험 정보 확인하기 →</span></button>
+<button class="tile" onclick="setPage('detail');detailIndex=2"><b>어학·자격증</b><span>인증 기준 확인하기 →</span></button>
+<button class="tile" onclick="setPage('detail');detailIndex=3"><b>제출 서류·일정</b><span>준비 일정 확인하기 →</span></button></div>
 <div class="section-head"><h3>나의 준비 현황</h3><button class="btn small secondary" onclick="setPage('check')">체크리스트 보기</button></div>
 <div class="card"><b>${state.university?esc(state.university)+' · '+esc(state.unit||'모집단위 미입력'):'아직 조회 조건을 설정하지 않았어요.'}</b><p class="sub" style="margin:6px 0 0">${state.year?esc(state.year)+'학년도 · '+esc(state.type):'조회 조건을 설정하면 맞춤 준비사항을 관리할 수 있어요.'}</p></div>`}
-function search(){return `${titlebar('조회 조건 선택','1 / 4')}<div class="progress"><i style="width:25%"></i></div><h1 style="font-size:21px">편입 준비를 위한<br>조회 조건을 선택해주세요.</h1><p class="sub">선택한 조건은 이 브라우저에 자동 저장됩니다.</p>
+function search(){return `${titlebar('조회 조건 선택','1 / 4')}<div class="progress"><i style="width:25%"></i></div><h1 style="font-size:20px">편입 준비를 위한<br>조회 조건을 선택해주세요.</h1><p class="sub">선택한 조건은 이 브라우저에 자동 저장됩니다.</p>
 <label for="uni">대학</label><select id="uni"><option value="">선택하세요</option>${['예시대학교','서울대학교','연세대학교','고려대학교','성균관대학교','한양대학교','중앙대학교','경희대학교','기타'].map(x=>`<option ${state.university===x?'selected':''}>${x}</option>`).join('')}</select>
 <label for="year">모집연도</label><select id="year"><option value="">선택하세요</option>${['2027','2028','2029','2030'].map(x=>`<option ${state.year===x?'selected':''}>${x}</option>`).join('')}</select>
 <label for="type">편입 전형</label><select id="type"><option value="">선택하세요</option>${['일반편입','학사편입','기타 전형'].map(x=>`<option ${state.type===x?'selected':''}>${x}</option>`).join('')}</select>
@@ -135,7 +292,7 @@ function search(){return `${titlebar('조회 조건 선택','1 / 4')}<div class=
 <div class="actions"><button class="btn secondary" onclick="setPage('home')">취소</button><button class="btn" onclick="saveSearch()">준비사항 확인 →</button></div>`}
 function saveSearch(){state.university=document.getElementById('uni').value;state.year=document.getElementById('year').value;state.type=document.getElementById('type').value;state.unit=document.getElementById('unit').value.trim();if(!state.university||!state.year||!state.type||!state.unit){toast('모든 조건을 입력해주세요.');return;}save();setPage('list');}
 function list(){return `${titlebar('나의 편입 준비사항','2 / 4')}<div class="progress"><i style="width:50%"></i></div><div class="card" style="background:#f3f3f3"><b>${esc(state.university||'대학 미선택')} · ${esc(state.unit||'모집단위 미입력')}</b><p class="sub" style="margin:5px 0 0">${esc(state.year||'연도 미선택')}학년도 · ${esc(state.type||'전형 미선택')}</p><button class="btn secondary" style="margin-top:12px" onclick="setPage('search')">조회 조건 수정</button></div>
-<p class="sub" style="margin-top:18px">확인할 항목을 선택하고 필요한 정보를 기록하세요.</p>${categories.map((c,i)=>`<button class="item" style="width:100%;text-align:left" onclick="detailIndex=${i};setPage('detail')"><span><b>${c.title}</b><p>${c.desc}</p><small class="header-note">${state.details[i]?.note?'내 메모 있음':'정보 확인 및 메모 입력'}</small></span><span class="arrow">›</span></button>`).join('')}
+<p class="sub" style="margin-top:16px">확인할 항목을 선택하고 필요한 정보를 기록하세요.</p>${categories.map((c,i)=>`<button class="item" style="width:100%;text-align:left" onclick="detailIndex=${i};setPage('detail')"><span><b>${c.title}</b><p>${c.desc}</p><small class="header-note">${state.details[i]?.note?'내 메모 있음':'정보 확인 및 메모 입력'}</small></span><span class="arrow">›</span></button>`).join('')}
 <div class="actions"><button class="btn secondary" onclick="setPage('search')">이전</button><button class="btn" onclick="setPage('check')">내 체크리스트 보기 →</button></div>`}
 function detail(){let c=categories[detailIndex],d=state.details[detailIndex]||{};return `${titlebar(c.title,'3 / 4')}<div class="progress"><i style="width:75%"></i></div><p class="sub">${esc(state.university||'대학 미선택')} · ${esc(state.unit||'모집단위 미입력')} · ${esc(state.type||'전형 미선택')}</p><span class="status">공식 확인 전 · 직접 입력 필요</span><h2>${c.title}</h2><p class="sub">${c.desc}</p>
 <div class="info">아래 항목은 입력용 메모입니다. 대학별 실제 기준을 자동으로 조회한 결과가 아니므로, 공식 모집요강을 확인한 뒤 내용을 입력해주세요.</div>
@@ -144,17 +301,17 @@ ${c.fields.map((f,i)=>`<label for="field${i}">${f}</label><input type="text" id=
 <label for="note">추가 메모</label><input type="text" id="note" placeholder="확인할 내용이나 질문" value="${esc(d.note||'')}">
 <div class="actions"><button class="btn secondary" onclick="setPage('list')">목록으로</button><button class="btn" onclick="saveDetail()">내용 저장</button></div>
 <div class="section-head"><button class="btn secondary" onclick="detailIndex=(detailIndex+3)%4;render()">← 이전 항목</button><button class="btn secondary" onclick="detailIndex=(detailIndex+1)%4;render()">다음 항목 →</button></div>
-<button class="btn ghost" onclick="setPage('check')">체크리스트로 이동 →</button>`}
+<button class="btn ghost" style="margin-top:10px" onclick="setPage('check')">체크리스트로 이동 →</button>`}
 function saveDetail(){let fields=categories[detailIndex].fields.map((_,i)=>document.getElementById('field'+i).value.trim());state.details[detailIndex]={fields,source:document.getElementById('source').value.trim(),note:document.getElementById('note').value.trim()};save();toast('항목 내용이 저장되었습니다.');}
-function check(){let n=state.checks.filter(Boolean).length;return `${titlebar('내 준비 체크리스트','4 / 4')}<div class="progress"><i style="width:100%"></i></div><div class="card" style="background:#f2f2f2"><div class="step"><b>전체 진행률</b><b>${n} / 4개 완료</b></div><h1 style="font-size:28px;margin:0">${Math.round(n/4*100)}%</h1><div class="progress"><i style="width:${n/4*100}%"></i></div></div>
+function check(){let n=state.checks.filter(Boolean).length;return `${titlebar('내 준비 체크리스트','4 / 4')}<div class="progress"><i style="width:100%"></i></div><div class="card" style="background:#f2f2f2"><div class="step"><b>전체 진행률</b><b>${n} / 4개 완료</b></div><h1 style="font-size:26px;margin:0">${Math.round(n/4*100)}%</h1><div class="progress"><i style="width:${n/4*100}%"></i></div></div>
 ${['지원 자격·학점 확인','시험 과목·범위 확인','어학·자격증 확인','제출 서류·일정 확인'].map((x,i)=>`<label class="check-row"><input type="checkbox" ${state.checks[i]?'checked':''} onchange="toggleCheck(${i},this.checked)"><span>${x}<small>${state.checks[i]?'확인 완료':'확인 여부를 체크하세요'}</small></span></label>`).join('')}
 <div class="info">체크는 정보 확인 여부를 기록합니다. 지원 자격 충족이나 서류 제출 완료를 의미하지 않습니다. 최종 내용은 반드시 대학 공식 모집요강과 공지에서 확인하세요.</div>
 <div class="actions"><button class="btn secondary" onclick="setPage('list')">준비사항 다시 보기</button><button class="btn" onclick="setPage('home')">홈으로</button></div>
 <button class="btn ghost" style="margin-top:10px" onclick="resetChecks()">체크 상태 초기화</button>`}
 function toggleCheck(i,v){state.checks[i]=v;save();render();toast('체크 상태를 저장했습니다.');}
 function resetChecks(){if(confirm('체크 상태를 모두 초기화할까요?')){state.checks=[false,false,false,false];save();render();toast('체크 상태를 초기화했습니다.');}}
-function profile(){return `${titlebar('설정 및 데이터 관리')}<h1 style="font-size:22px">내 정보와 저장 데이터</h1><p class="sub">입력한 정보는 현재 브라우저의 로컬 저장소에 보관됩니다.</p><div class="card"><h3>현재 조회 조건</h3><p style="font-size:14px;margin-bottom:0">${esc(state.university||'대학 미선택')}<br>${esc(state.year||'-')}학년도 · ${esc(state.type||'-')}<br>${esc(state.unit||'모집단위 미입력')}</p></div>
-<div class="section-head"><h3>데이터 관리</h3></div><button class="btn secondary" onclick="exportData()">내 데이터 백업하기 (JSON)</button><label for="importFile">백업 파일 불러오기</label><input type="file" id="importFile" accept=".json,application/json"><button class="btn secondary" style="margin-top:10px" onclick="importData()">백업 데이터 복원</button><button class="btn ghost" style="margin-top:18px" onclick="clearAll()">전체 데이터 삭제</button>
+function profile(){return `${titlebar('설정 및 데이터 관리')}<h1 style="font-size:20px">내 정보와 저장 데이터</h1><p class="sub">입력한 정보는 현재 브라우저의 로컬 저장소에 보관됩니다.</p><div class="card"><h3>현재 조회 조건</h3><p style="font-size:13px;margin-bottom:0">${esc(state.university||'대학 미선택')}<br>${esc(state.year||'-')}학년도 · ${esc(state.type||'-')}<br>${esc(state.unit||'모집단위 미입력')}</p></div>
+<div class="section-head"><h3>데이터 관리</h3></div><button class="btn secondary" onclick="exportData()">내 데이터 백업하기 (JSON)</button><label for="importFile">백업 파일 불러오기</label><input type="file" id="importFile" accept=".json,application/json"><button class="btn secondary" style="margin-top:10px" onclick="importData()">백업 데이터 복원</button><button class="btn ghost" style="margin-top:16px" onclick="clearAll()">전체 데이터 삭제</button>
 <div class="info">브라우저 데이터 삭제, 시크릿 모드 사용, 다른 기기 접속 시 저장 내용이 유지되지 않을 수 있습니다. 여러 기기 간 동기화나 서버 저장 기능은 포함되어 있지 않습니다.</div>`}
 function exportData(){let blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='편입준비_백업.json';a.click();URL.revokeObjectURL(a.href);toast('백업 파일을 만들었습니다.');}
 function importData(){let f=document.getElementById('importFile').files[0];if(!f){toast('먼저 백업 파일을 선택해주세요.');return;}let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);state={...defaults,...d};save();setPage('home');toast('데이터를 복원했습니다.');}catch(e){toast('올바른 백업 파일이 아닙니다.');}};r.readAsText(f);}
@@ -162,4 +319,5 @@ function clearAll(){if(confirm('저장된 모든 조건, 메모, 체크 상태�
 document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>setPage(b.dataset.page)));
 render();
 </script>
-</body></html>
+</body>
+</html>
