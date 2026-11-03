@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -37,7 +36,7 @@ button { cursor: pointer; }
 
 .app {
   width: 100%;
-  max-width: 430px; /* 아이폰/갤럭시 표준 모바일 폭 */
+  max-width: 430px; /* 모바일 표준 폭 */
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0 auto;
@@ -208,8 +207,8 @@ select:focus, input[type=text]:focus { outline: none; border-color: var(--accent
 .nav b { font-size: 17px; font-weight: 500; }
 .nav.active { color: var(--accent); font-weight: 800; }
 
-.back { border: 0; background: transparent; font-size: 20px; padding: 0 6px 0 0; }
-.topline { display: flex; align-items: center; margin-bottom: 14px; }
+.back { border: 0; background: transparent; font-size: 20px; padding: 0 8px 0 0; display: inline-flex; align-items: center; }
+.topline { display: flex; align-items: center; margin-bottom: 14px; min-height: 28px; }
 .topline h2 { flex: 1; margin: 0; font-size: 18px; }
 
 .toast {
@@ -246,6 +245,7 @@ footer { padding: 0 16px 20px; color: #999999; font-size: 10px; text-align: cent
 </nav>
 </div>
 <div class="toast" id="toast">저장되었습니다.</div>
+
 <script>
 const KEY='transferPrepApp_v1';
 const defaults={university:'',year:'',type:'',unit:'',checks:[false,false,false,false],details:{},lastPage:'home'};
@@ -257,13 +257,29 @@ const categories=[
  {title:'어학·자격증',desc:'공인어학성적 및 자격증 기준',fields:['어학 기준','자격증 기준']},
  {title:'제출 서류·일정',desc:'필요 서류와 원서 접수 일정',fields:['제출 서류','주요 일정']}
 ];
+
+// 2020년부터 2030년까지 연도 목록 생성
+const years = Array.from({length: 11}, (_, i) => String(2020 + i));
+
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 function toast(msg='저장되었습니다.'){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function progress(){return Math.round(state.checks.filter(Boolean).length/4*100)}
 function setPage(p){page=p;render();window.scrollTo({top:0,behavior:'smooth'});}
-function titlebar(title,step=''){return `<div class="topline"><button class="back" onclick="goBack()" aria-label="뒤로">←</button><h2>${title}</h2><span class="header-note">${step}</span></div>`}
-function goBack(){if(page==='detail')setPage('list');else if(page==='list'||page==='check')setPage('home');else setPage('home');}
+
+// showBack 파라미터를 추가하여 화살표 표시 제어
+function titlebar(title, step='', showBack=true){
+  const backBtn = showBack ? `<button class="back" onclick="goBack()" aria-label="뒤로">←</button>` : '';
+  const note = step ? `<span class="header-note">${step}</span>` : '';
+  return `<div class="topline">${backBtn}<h2>${title}</h2>${note}</div>`;
+}
+
+function goBack(){
+  if(page==='detail') setPage('list');
+  else if(page==='list'||page==='check'||page==='search') setPage('home');
+  else setPage('home');
+}
+
 function render(){
  document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.page===(page==='detail'?'list':page)));
  const el=document.getElementById('screen');
@@ -274,6 +290,7 @@ function render(){
  if(page==='check')el.innerHTML=check();
  if(page==='profile')el.innerHTML=profile();
 }
+
 function home(){return `<div class="eyebrow">TRANSFER PREPARATION · DASHBOARD</div><h1>편입 준비,<br>한눈에 확인하세요.</h1><p class="sub">목표 대학의 준비 조건부터 체크리스트까지 차근차근 관리할 수 있어요.</p>
 <div class="hero"><h2>나에게 맞는 편입 준비 시작하기</h2><p>대학과 전형 조건을 선택하면 필요한 준비사항을 한곳에서 확인할 수 있습니다.</p><button class="btn" onclick="setPage('search')">편입 준비 시작하기 →</button></div>
 <div class="stats"><div class="stat"><strong>${progress()}%</strong><span>준비 체크 진행률</span><div class="progress"><i style="width:${progress()}%"></i></div></div><div class="stat"><strong>${state.university?esc(state.university):'미선택'}</strong><span>선택한 목표 대학</span></div></div>
@@ -284,17 +301,29 @@ function home(){return `<div class="eyebrow">TRANSFER PREPARATION · DASHBOARD</
 <button class="tile" onclick="setPage('detail');detailIndex=3"><b>제출 서류·일정</b><span>준비 일정 확인하기 →</span></button></div>
 <div class="section-head"><h3>나의 준비 현황</h3><button class="btn small secondary" onclick="setPage('check')">체크리스트 보기</button></div>
 <div class="card"><b>${state.university?esc(state.university)+' · '+esc(state.unit||'모집단위 미입력'):'아직 조회 조건을 설정하지 않았어요.'}</b><p class="sub" style="margin:6px 0 0">${state.year?esc(state.year)+'학년도 · '+esc(state.type):'조회 조건을 설정하면 맞춤 준비사항을 관리할 수 있어요.'}</p></div>`}
-function search(){return `${titlebar('조회 조건 선택','1 / 4')}<div class="progress"><i style="width:25%"></i></div><h1 style="font-size:20px">편입 준비를 위한<br>조회 조건을 선택해주세요.</h1><p class="sub">선택한 조건은 이 브라우저에 자동 저장됩니다.</p>
+
+function search(){return `${titlebar('조회 조건 선택','1 / 4', true)}<div class="progress"><i style="width:25%"></i></div><h1 style="font-size:20px">편입 준비를 위한<br>조회 조건을 선택해주세요.</h1><p class="sub">선택한 조건은 이 브라우저에 자동 저장됩니다.</p>
 <label for="uni">대학</label><select id="uni"><option value="">선택하세요</option>${['예시대학교','서울대학교','연세대학교','고려대학교','성균관대학교','한양대학교','중앙대학교','경희대학교','기타'].map(x=>`<option ${state.university===x?'selected':''}>${x}</option>`).join('')}</select>
-<label for="year">모집연도</label><select id="year"><option value="">선택하세요</option>${['2027','2028','2029','2030'].map(x=>`<option ${state.year===x?'selected':''}>${x}</option>`).join('')}</select>
+<label for="year">모집연도</label><select id="year"><option value="">선택하세요</option>${years.map(x=>`<option ${state.year===x?'selected':''}>${x}학년도</option>`).join('')}</select>
 <label for="type">편입 전형</label><select id="type"><option value="">선택하세요</option>${['일반편입','학사편입','기타 전형'].map(x=>`<option ${state.type===x?'selected':''}>${x}</option>`).join('')}</select>
 <label for="unit">모집단위</label><input id="unit" type="text" placeholder="예: 컴퓨터공학과" value="${esc(state.unit)}"><p class="form-hint">※ 예시 데이터가 포함되어 있습니다. 정확한 지원 조건은 해당 대학의 공식 모집요강을 확인하세요.</p>
 <div class="actions"><button class="btn secondary" onclick="setPage('home')">취소</button><button class="btn" onclick="saveSearch()">준비사항 확인 →</button></div>`}
-function saveSearch(){state.university=document.getElementById('uni').value;state.year=document.getElementById('year').value;state.type=document.getElementById('type').value;state.unit=document.getElementById('unit').value.trim();if(!state.university||!state.year||!state.type||!state.unit){toast('모든 조건을 입력해주세요.');return;}save();setPage('list');}
-function list(){return `${titlebar('나의 편입 준비사항','2 / 4')}<div class="progress"><i style="width:50%"></i></div><div class="card" style="background:#f3f3f3"><b>${esc(state.university||'대학 미선택')} · ${esc(state.unit||'모집단위 미입력')}</b><p class="sub" style="margin:5px 0 0">${esc(state.year||'연도 미선택')}학년도 · ${esc(state.type||'전형 미선택')}</p><button class="btn secondary" style="margin-top:12px" onclick="setPage('search')">조회 조건 수정</button></div>
+
+function saveSearch(){
+  state.university=document.getElementById('uni').value;
+  // '학년도' 글자 제거 후 순수 연도만 저장
+  state.year=document.getElementById('year').value.replace('학년도','');
+  state.type=document.getElementById('type').value;
+  state.unit=document.getElementById('unit').value.trim();
+  if(!state.university||!state.year||!state.type||!state.unit){toast('모든 조건을 입력해주세요.');return;}
+  save();setPage('list');
+}
+
+function list(){return `${titlebar('나의 편입 준비사항','2 / 4', true)}<div class="progress"><i style="width:50%"></i></div><div class="card" style="background:#f3f3f3"><b>${esc(state.university||'대학 미선택')} · ${esc(state.unit||'모집단위 미입력')}</b><p class="sub" style="margin:5px 0 0">${esc(state.year||'연도 미선택')}학년도 · ${esc(state.type||'전형 미선택')}</p><button class="btn secondary" style="margin-top:12px" onclick="setPage('search')">조회 조건 수정</button></div>
 <p class="sub" style="margin-top:16px">확인할 항목을 선택하고 필요한 정보를 기록하세요.</p>${categories.map((c,i)=>`<button class="item" style="width:100%;text-align:left" onclick="detailIndex=${i};setPage('detail')"><span><b>${c.title}</b><p>${c.desc}</p><small class="header-note">${state.details[i]?.note?'내 메모 있음':'정보 확인 및 메모 입력'}</small></span><span class="arrow">›</span></button>`).join('')}
 <div class="actions"><button class="btn secondary" onclick="setPage('search')">이전</button><button class="btn" onclick="setPage('check')">내 체크리스트 보기 →</button></div>`}
-function detail(){let c=categories[detailIndex],d=state.details[detailIndex]||{};return `${titlebar(c.title,'3 / 4')}<div class="progress"><i style="width:75%"></i></div><p class="sub">${esc(state.university||'대학 미선택')} · ${esc(state.unit||'모집단위 미입력')} · ${esc(state.type||'전형 미선택')}</p><span class="status">공식 확인 전 · 직접 입력 필요</span><h2>${c.title}</h2><p class="sub">${c.desc}</p>
+
+function detail(){let c=categories[detailIndex],d=state.details[detailIndex]||{};return `${titlebar(c.title,'3 / 4', true)}<div class="progress"><i style="width:75%"></i></div><p class="sub">${esc(state.university||'대학 미선택')} · ${esc(state.unit||'모집단위 미입력')} · ${esc(state.type||'전형 미선택')}</p><span class="status">공식 확인 전 · 직접 입력 필요</span><h2>${c.title}</h2><p class="sub">${c.desc}</p>
 <div class="info">아래 항목은 입력용 메모입니다. 대학별 실제 기준을 자동으로 조회한 결과가 아니므로, 공식 모집요강을 확인한 뒤 내용을 입력해주세요.</div>
 ${c.fields.map((f,i)=>`<label for="field${i}">${f}</label><input type="text" id="field${i}" placeholder="${f} 내용을 입력하세요" value="${esc((d.fields||[])[i]||'')}">`).join('')}
 <label for="source">공식 근거 자료 링크 또는 문서명</label><input type="text" id="source" placeholder="대학 입학처 모집요강 URL / 문서명" value="${esc(d.source||'')}">
@@ -302,20 +331,27 @@ ${c.fields.map((f,i)=>`<label for="field${i}">${f}</label><input type="text" id=
 <div class="actions"><button class="btn secondary" onclick="setPage('list')">목록으로</button><button class="btn" onclick="saveDetail()">내용 저장</button></div>
 <div class="section-head"><button class="btn secondary" onclick="detailIndex=(detailIndex+3)%4;render()">← 이전 항목</button><button class="btn secondary" onclick="detailIndex=(detailIndex+1)%4;render()">다음 항목 →</button></div>
 <button class="btn ghost" style="margin-top:10px" onclick="setPage('check')">체크리스트로 이동 →</button>`}
+
 function saveDetail(){let fields=categories[detailIndex].fields.map((_,i)=>document.getElementById('field'+i).value.trim());state.details[detailIndex]={fields,source:document.getElementById('source').value.trim(),note:document.getElementById('note').value.trim()};save();toast('항목 내용이 저장되었습니다.');}
-function check(){let n=state.checks.filter(Boolean).length;return `${titlebar('내 준비 체크리스트','4 / 4')}<div class="progress"><i style="width:100%"></i></div><div class="card" style="background:#f2f2f2"><div class="step"><b>전체 진행률</b><b>${n} / 4개 완료</b></div><h1 style="font-size:26px;margin:0">${Math.round(n/4*100)}%</h1><div class="progress"><i style="width:${n/4*100}%"></i></div></div>
+
+function check(){let n=state.checks.filter(Boolean).length;return `${titlebar('내 준비 체크리스트','4 / 4', true)}<div class="progress"><i style="width:100%"></i></div><div class="card" style="background:#f2f2f2"><div class="step"><b>전체 진행률</b><b>${n} / 4개 완료</b></div><h1 style="font-size:26px;margin:0">${Math.round(n/4*100)}%</h1><div class="progress"><i style="width:${n/4*100}%"></i></div></div>
 ${['지원 자격·학점 확인','시험 과목·범위 확인','어학·자격증 확인','제출 서류·일정 확인'].map((x,i)=>`<label class="check-row"><input type="checkbox" ${state.checks[i]?'checked':''} onchange="toggleCheck(${i},this.checked)"><span>${x}<small>${state.checks[i]?'확인 완료':'확인 여부를 체크하세요'}</small></span></label>`).join('')}
 <div class="info">체크는 정보 확인 여부를 기록합니다. 지원 자격 충족이나 서류 제출 완료를 의미하지 않습니다. 최종 내용은 반드시 대학 공식 모집요강과 공지에서 확인하세요.</div>
 <div class="actions"><button class="btn secondary" onclick="setPage('list')">준비사항 다시 보기</button><button class="btn" onclick="setPage('home')">홈으로</button></div>
 <button class="btn ghost" style="margin-top:10px" onclick="resetChecks()">체크 상태 초기화</button>`}
+
 function toggleCheck(i,v){state.checks[i]=v;save();render();toast('체크 상태를 저장했습니다.');}
 function resetChecks(){if(confirm('체크 상태를 모두 초기화할까요?')){state.checks=[false,false,false,false];save();render();toast('체크 상태를 초기화했습니다.');}}
-function profile(){return `${titlebar('설정 및 데이터 관리')}<h1 style="font-size:20px">내 정보와 저장 데이터</h1><p class="sub">입력한 정보는 현재 브라우저의 로컬 저장소에 보관됩니다.</p><div class="card"><h3>현재 조회 조건</h3><p style="font-size:13px;margin-bottom:0">${esc(state.university||'대학 미선택')}<br>${esc(state.year||'-')}학년도 · ${esc(state.type||'-')}<br>${esc(state.unit||'모집단위 미입력')}</p></div>
+
+// 설정 화면: showBack 인자를 false로 전달하여 왼쪽 화살표 제거
+function profile(){return `${titlebar('설정 및 데이터 관리', '', false)}<h1 style="font-size:20px">내 정보와 저장 데이터</h1><p class="sub">입력한 정보는 현재 브라우저의 로컬 저장소에 보관됩니다.</p><div class="card"><h3>현재 조회 조건</h3><p style="font-size:13px;margin-bottom:0">${esc(state.university||'대학 미선택')}<br>${esc(state.year||'-')}학년도 · ${esc(state.type||'-')}<br>${esc(state.unit||'모집단위 미입력')}</p></div>
 <div class="section-head"><h3>데이터 관리</h3></div><button class="btn secondary" onclick="exportData()">내 데이터 백업하기 (JSON)</button><label for="importFile">백업 파일 불러오기</label><input type="file" id="importFile" accept=".json,application/json"><button class="btn secondary" style="margin-top:10px" onclick="importData()">백업 데이터 복원</button><button class="btn ghost" style="margin-top:16px" onclick="clearAll()">전체 데이터 삭제</button>
 <div class="info">브라우저 데이터 삭제, 시크릿 모드 사용, 다른 기기 접속 시 저장 내용이 유지되지 않을 수 있습니다. 여러 기기 간 동기화나 서버 저장 기능은 포함되어 있지 않습니다.</div>`}
+
 function exportData(){let blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='편입준비_백업.json';a.click();URL.revokeObjectURL(a.href);toast('백업 파일을 만들었습니다.');}
 function importData(){let f=document.getElementById('importFile').files[0];if(!f){toast('먼저 백업 파일을 선택해주세요.');return;}let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);state={...defaults,...d};save();setPage('home');toast('데이터를 복원했습니다.');}catch(e){toast('올바른 백업 파일이 아닙니다.');}};r.readAsText(f);}
 function clearAll(){if(confirm('저장된 모든 조건, 메모, 체크 상태를 삭제할까요?')){state={...defaults,checks:[false,false,false,false],details:{}};save();setPage('home');toast('모든 데이터를 삭제했습니다.');}}
+
 document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>setPage(b.dataset.page)));
 render();
 </script>
