@@ -3,20 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#292929">
-<title>편입 준비 한눈에</title>
+<meta name="theme-color" content="#1e293b">
+<title>편입 준비 한눈에 - AI Transfer Guide</title>
 <style>
 :root {
-  --ink: #222222;
-  --muted: #777777;
-  --line: #e2e2e2;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
   --paper: #ffffff;
-  --bg: #f4f4f4;
-  --soft: #f8f8f8;
-  --accent: #111111;
+  --bg: #f8fafc;
+  --soft: #f1f5f9;
+  --accent: #1e293b;
   --primary: #2563eb;
   --primary-light: #eff6ff;
-  --tag-bg: #f3f4f6;
+  --warning: #f59e0b;
+  --warning-bg: #fffbeb;
+  --danger: #ef4444;
 }
 
 * { box-sizing: border-box; }
@@ -28,7 +30,7 @@ html, body {
   height: 100%;
   background: var(--bg);
   color: var(--ink);
-  font-family: system-ui, -apple-system, "Noto Sans KR", sans-serif;
+  font-family: system-ui, -apple-system, "Pretendard", "Noto Sans KR", sans-serif;
   -webkit-tap-highlight-color: transparent;
   display: flex;
   justify-content: center;
@@ -45,7 +47,7 @@ button { cursor: pointer; }
   margin: 0 auto;
   background: var(--paper);
   padding-bottom: calc(78px + env(safe-area-inset-bottom));
-  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+  box-shadow: 0 0 25px rgba(0,0,0,0.06);
   position: relative;
 }
 
@@ -59,7 +61,7 @@ header {
   top: 0;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  z-index: 5;
+  z-index: 10;
 }
 
 .brand {
@@ -68,6 +70,7 @@ header {
   display: flex;
   gap: 8px;
   align-items: center;
+  color: var(--ink);
 }
 
 .cap {
@@ -81,14 +84,14 @@ header {
   font-size: 12px;
 }
 
-.header-note { font-size: 11px; color: var(--muted); font-weight: 600; }
+.header-note { font-size: 11px; color: var(--muted); font-weight: 700; }
 
 main { padding: 20px 16px 24px; }
 
 .eyebrow {
-  font-size: 10px;
-  letter-spacing: .1em;
-  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--primary);
   font-weight: 700;
   margin-bottom: 6px;
 }
@@ -100,13 +103,13 @@ p { line-height: 1.55; margin: 0; }
 .sub { color: var(--muted); font-size: 13px; margin: 0 0 16px; line-height: 1.45; }
 
 .hero {
-  background: var(--soft);
+  background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 16px;
   margin: 6px 0 16px;
 }
-.hero p { font-size: 13px; margin: 0 0 12px; color: #555; }
+.hero p { font-size: 13px; margin: 0 0 12px; color: #475569; }
 
 .btn {
   border: 1px solid var(--accent);
@@ -124,8 +127,8 @@ p { line-height: 1.55; margin: 0; }
   transition: opacity .15s;
 }
 .btn:active { opacity: 0.85; }
-.btn.secondary { background: white; color: var(--ink); border-color: #cccccc; }
-.btn.ghost { background: var(--soft); color: #333; border-color: var(--line); }
+.btn.secondary { background: white; color: var(--ink); border-color: #cbd5e1; }
+.btn.ghost { background: var(--soft); color: #334155; border-color: var(--line); }
 .btn.small { width: auto; min-height: 32px; padding: 5px 12px; font-size: 12px; }
 .btn.danger { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
 
@@ -140,13 +143,12 @@ p { line-height: 1.55; margin: 0; }
 .stat strong { font-size: 19px; display: block; color: var(--ink); }
 .stat span { font-size: 11px; color: var(--muted); }
 
-/* 홈 우측 뱃지 순위 영역 */
 .rank-badges { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
 .rank-badge {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 7px;
+  padding: 5px 8px;
   background: white;
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -155,18 +157,18 @@ p { line-height: 1.55; margin: 0; }
   text-align: left;
 }
 .rank-badge.active {
-  border-color: var(--accent);
-  background: #fdfdfd;
+  border-color: var(--primary);
+  background: var(--primary-light);
   font-weight: 700;
+  color: var(--primary);
 }
 .rank-badge small { color: var(--muted); font-size: 10px; margin-left: 4px; }
 
-.progress { height: 7px; background: #e5e5e5; border-radius: 20px; overflow: hidden; margin: 8px 0; }
-.progress i { display: block; height: 100%; background: var(--accent); border-radius: 20px; transition: width .2s; }
+.progress { height: 7px; background: #e2e8f0; border-radius: 20px; overflow: hidden; margin: 8px 0; }
+.progress i { display: block; height: 100%; background: var(--primary); border-radius: 20px; transition: width .2s; }
 
 .section-head { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 10px; }
 
-/* 대학 전환 탭 바 */
 .tab-scroll-container {
   display: flex;
   gap: 6px;
@@ -192,7 +194,6 @@ p { line-height: 1.55; margin: 0; }
   border-color: var(--accent);
 }
 
-/* 목표 대학 드래그 앤 드롭 카드 스타일 */
 .target-card {
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -204,7 +205,7 @@ p { line-height: 1.55; margin: 0; }
   user-select: none;
 }
 .target-card.dragging {
-  opacity: 0.55;
+  opacity: 0.5;
   box-shadow: 0 10px 20px rgba(0,0,0,0.12);
   transform: scale(0.98);
   border-color: var(--primary);
@@ -223,44 +224,58 @@ p { line-height: 1.55; margin: 0; }
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 12px;
-  background: #e5e7eb;
-  color: #374151;
+  background: #e2e8f0;
+  color: #334155;
 }
-.badge-priority.p1 { background: #fef3c7; color: #92400e; }
-.badge-priority.p2 { background: #e0e7ff; color: #3730a3; }
+.badge-priority.p1 { background: #fef3c7; color: #b45309; }
+.badge-priority.p2 { background: #e0e7ff; color: #4338ca; }
 .badge-priority.p3 { background: #f1f5f9; color: #475569; }
 
-/* 순위 이동 드래그 핸들 (≡ 아이콘) */
 .drag-handle {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 28px;
-  color: #999;
+  color: #94a3b8;
   font-size: 18px;
   cursor: grab;
-  touch-action: none; /* 모바일에서 스크롤 방지하고 드래그 우선 */
+  touch-action: none;
 }
 .drag-handle:active {
   cursor: grabbing;
-  color: var(--accent);
+  color: var(--ink);
 }
 
-/* 폼 요소 */
 label { display: block; font-size: 13px; font-weight: 700; margin: 14px 0 6px; }
 select, input[type=text] {
   width: 100%;
   padding: 11px;
-  border: 1px solid #cccccc;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: white;
-  color: #222;
+  color: #0f172a;
   min-height: 44px;
   font-size: 14px;
 }
-select:focus, input[type=text]:focus { outline: none; border-color: var(--accent); }
-.form-hint { font-size: 11px; color: var(--muted); margin: 6px 0 0; line-height: 1.4; }
+select:focus, input[type=text]:focus { outline: none; border-color: var(--primary); }
+
+/* 서울대 안내 알림 배너 */
+.notice-box {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 10px;
+  display: none;
+}
+.notice-box.show {
+  display: block;
+}
+
 .actions { display: flex; gap: 8px; margin-top: 16px; }
 .actions > * { flex: 1; }
 
@@ -276,9 +291,8 @@ select:focus, input[type=text]:focus { outline: none; border-color: var(--accent
   background: white;
 }
 .item p { font-size: 12px; color: var(--muted); margin: 3px 0 0; }
-.arrow { font-size: 18px; color: #777; }
+.arrow { font-size: 18px; color: #94a3b8; }
 
-/* 안내 전용 카드 스타일 */
 .guide-box {
   background: var(--soft);
   border: 1px solid var(--line);
@@ -289,15 +303,14 @@ select:focus, input[type=text]:focus { outline: none; border-color: var(--accent
 .guide-row { margin-bottom: 12px; }
 .guide-row:last-child { margin-bottom: 0; }
 .guide-row strong { display: block; font-size: 13px; color: var(--accent); margin-bottom: 3px; }
-.guide-row p { font-size: 13px; color: #444; line-height: 1.5; }
+.guide-row p { font-size: 13px; color: #334155; line-height: 1.5; }
 
-.info { background: var(--soft); border: 1px solid var(--line); border-radius: 10px; padding: 12px; font-size: 12px; line-height: 1.55; color: #555; margin: 12px 0; }
+.info { background: var(--soft); border: 1px solid var(--line); border-radius: 10px; padding: 12px; font-size: 12px; line-height: 1.55; color: #475569; margin: 12px 0; }
 .status-badge { display: inline-block; border-radius: 20px; background: #e0f2fe; color: #0369a1; padding: 4px 10px; font-size: 11px; margin: 4px 0 10px; font-weight: 700; }
 .check-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 2px; border-bottom: 1px solid var(--line); font-size: 13px; }
-.check-row input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; margin: 1px 0 0; }
+.check-row input { width: 18px; height: 18px; accent-color: var(--primary); flex: none; margin: 1px 0 0; }
 .check-row small { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; }
 
-/* 설정 탭 1순위 엠블럼 워터마크 카드 */
 .emblem-card {
   position: relative;
   overflow: hidden;
@@ -311,9 +324,9 @@ select:focus, input[type=text]:focus { outline: none; border-color: var(--accent
   position: absolute;
   right: -15px;
   bottom: -20px;
-  width: 140px;
-  height: 140px;
-  opacity: 0.08;
+  width: 145px;
+  height: 145px;
+  opacity: 0.09;
   pointer-events: none;
   z-index: 1;
 }
@@ -322,11 +335,10 @@ select:focus, input[type=text]:focus { outline: none; border-color: var(--accent
   z-index: 2;
 }
 
-/* AI 모달 (시뮬레이션 로딩) */
 .ai-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -348,8 +360,8 @@ select:focus, input[type=text]:focus { outline: none; border-color: var(--accent
 .ai-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid var(--accent);
+  border: 3px solid #f1f5f9;
+  border-top: 3px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 16px;
@@ -358,9 +370,8 @@ select:focus, input[type=text]:focus { outline: none; border-color: var(--accent
 .ai-modal h3 { font-size: 16px; margin: 0 0 6px; }
 .ai-modal p { font-size: 12px; color: var(--muted); margin: 0 0 16px; }
 .ai-progress-track { width: 100%; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; }
-.ai-progress-bar { width: 0%; height: 100%; background: var(--accent); transition: width .3s ease; }
+.ai-progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width .3s ease; }
 
-/* 하단 탭바 & 토스트 */
 .bottom {
   position: fixed;
   bottom: 0;
@@ -372,13 +383,13 @@ select:focus, input[type=text]:focus { outline: none; border-color: var(--accent
   background: rgba(255, 255, 255, 0.96);
   border-top: 1px solid var(--line);
   padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
-  z-index: 6;
+  z-index: 10;
   backdrop-filter: blur(10px);
 }
 .nav {
   border: 0;
   background: transparent;
-  color: #888888;
+  color: #94a3b8;
   font-size: 10px;
   padding: 4px 2px;
   display: flex;
@@ -387,7 +398,7 @@ select:focus, input[type=text]:focus { outline: none; border-color: var(--accent
   gap: 2px;
 }
 .nav b { font-size: 17px; font-weight: 500; }
-.nav.active { color: var(--accent); font-weight: 800; }
+.nav.active { color: var(--primary); font-weight: 800; }
 
 .back { border: 0; background: transparent; font-size: 20px; padding: 0 8px 0 0; display: inline-flex; align-items: center; }
 .topline { display: flex; align-items: center; margin-bottom: 14px; min-height: 28px; }
@@ -398,7 +409,7 @@ select:focus, input[type=text]:focus { outline: none; border-color: var(--accent
   bottom: calc(72px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
-  background: #222222;
+  background: #1e293b;
   color: white;
   padding: 9px 16px;
   border-radius: 30px;
@@ -406,11 +417,11 @@ select:focus, input[type=text]:focus { outline: none; border-color: var(--accent
   opacity: 0;
   pointer-events: none;
   transition: opacity .2s;
-  z-index: 10;
+  z-index: 20;
   white-space: nowrap;
 }
 .toast.show { opacity: 1; }
-footer { padding: 0 16px 20px; color: #999999; font-size: 10px; text-align: center; }
+footer { padding: 0 16px 20px; color: #94a3b8; font-size: 10px; text-align: center; }
 </style>
 </head>
 <body>
@@ -422,7 +433,7 @@ footer { padding: 0 16px 20px; color: #999999; font-size: 10px; text-align: cent
   
   <main id="screen" aria-live="polite"></main>
   
-  <footer>입력한 목표 대학과 준비 상태는 브라우저에 자동 보관됩니다.</footer>
+  <footer>선택한 목표 대학과 준비 상태는 브라우저에 안전하게 보관됩니다.</footer>
   
   <nav class="bottom" aria-label="하단 메뉴">
     <button class="nav active" data-page="home"><b>⌂</b>홈</button>
@@ -447,67 +458,123 @@ footer { padding: 0 16px 20px; color: #999999; font-size: 10px; text-align: cent
 <div class="toast" id="toast">저장되었습니다.</div>
 
 <script>
-const KEY = 'transferPrepApp_drag_v1';
+const KEY = 'transferPrepApp_univ26_v1';
 
-// 대학별 엠블럼 SVG 목업
+// 확정된 26개 대학 목록
+const UNIVERSITY_LIST = [
+  '서울대', '연세대(신촌)', '고려대(서울)', '서강대', '성균관대', '한양대',
+  '중앙대', '이화여대', '경희대', '한국외대', '서울시립대', '건국대',
+  '동국대', '홍익대', '숙명여대', '국민대', '숭실대', '세종대',
+  '단국대', '광운대', '인하대', '아주대', '서울과기대', '가천대',
+  '경기대', '성신여대'
+];
+
+// 각 대학별 입학처 공식 출처 맵핑
+const UNIVERSITY_SOURCES = {
+  '서울대': 'https://admission.snu.ac.kr',
+  '연세대(신촌)': 'https://admission.yonsei.ac.kr',
+  '고려대(서울)': 'https://admission.korea.ac.kr',
+  '서강대': 'https://admission.sogang.ac.kr',
+  '성균관대': 'https://admission.skku.edu',
+  '한양대': 'https://go.hanyang.ac.kr',
+  '중앙대': 'https://admission.cau.ac.kr',
+  '이화여대': 'https://admission.ewha.ac.kr',
+  '경희대': 'https://iphak.khu.ac.kr',
+  '한국외대': 'https://adms.hufs.ac.kr',
+  '서울시립대': 'https://admission.uos.ac.kr',
+  '건국대': 'https://enter.konkuk.ac.kr',
+  '동국대': 'https://ipsi.dongguk.edu',
+  '홍익대': 'https://admission.hongik.ac.kr',
+  '숙명여대': 'https://admission.sookmyung.ac.kr',
+  '국민대': 'https://admission.kookmin.ac.kr',
+  '숭실대': 'https://iphak.ssu.ac.kr',
+  '세종대': 'https://ipsi.sejong.ac.kr',
+  '단국대': 'https://ipsi.dankook.ac.kr',
+  '광운대': 'https://iphak.kw.ac.kr',
+  '인하대': 'https://admission.inha.ac.kr',
+  '아주대': 'https://www.iajou.ac.kr',
+  '서울과기대': 'https://admission.seoultech.ac.kr',
+  '가천대': 'https://admission.gachon.ac.kr',
+  '경기대': 'https://enter.kyonggi.ac.kr',
+  '성신여대': 'https://ipsi.sungshin.ac.kr'
+};
+
+// 대학별 엠블럼 SVG 목업 (단색 벡터 심볼)
 const EMBLEMS = {
-  '인하대학교': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="6" fill="none"/><path d="M50 20 L78 75 L62 75 L50 48 L38 75 L22 75 Z"/><circle cx="50" cy="35" r="5"/></svg>`,
-  '성균관대학교': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="6" fill="none"/><path d="M30 40 C30 25, 70 25, 70 40 C70 55, 30 55, 30 70 C30 85, 70 85, 70 70" stroke="currentColor" stroke-width="7" fill="none"/></svg>`,
-  '한양대학교': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="6" fill="none"/><polygon points="50,18 80,42 68,80 32,80 20,42" fill="none" stroke="currentColor" stroke-width="5"/><text x="50" y="58" font-size="22" font-weight="bold" text-anchor="middle" fill="currentColor">HY</text></svg>`,
-  '중앙대학교': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="6" fill="none"/><path d="M30 30 H70 V70 H30 Z" stroke="currentColor" stroke-width="6" fill="none"/><circle cx="50" cy="50" r="10"/></svg>`,
-  '연세대학교': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="6" fill="none"/><circle cx="50" cy="38" r="16" stroke="currentColor" stroke-width="5" fill="none"/><polygon points="30,76 70,76 50,48" stroke="currentColor" stroke-width="5" fill="none"/></svg>`,
-  'default': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="6" fill="none"/><polygon points="50,22 82,40 50,56 18,40" stroke="currentColor" stroke-width="4" fill="none"/><path d="M30 46 V66 C30 76, 70 76, 70 66 V46" stroke="currentColor" stroke-width="4" fill="none"/></svg>`
+  '서울대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="5" fill="none"/><path d="M26 68 L50 24 L74 68 Z" stroke="currentColor" stroke-width="4" fill="none"/><circle cx="50" cy="48" r="8"/><text x="50" y="86" font-size="11" font-weight="bold" text-anchor="middle" fill="currentColor">VERITAS</text></svg>`,
+  '연세대(신촌)': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="5" fill="none"/><circle cx="50" cy="38" r="16" stroke="currentColor" stroke-width="4" fill="none"/><polygon points="30,76 70,76 50,48" stroke="currentColor" stroke-width="4" fill="none"/></svg>`,
+  '고려대(서울)': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="5" fill="none"/><polygon points="50,20 80,45 68,80 32,80 20,45" fill="none" stroke="currentColor" stroke-width="4"/><text x="50" y="58" font-size="20" font-weight="bold" text-anchor="middle" fill="currentColor">KU</text></svg>`,
+  '서강대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="5" fill="none"/><polygon points="50,22 80,78 20,78" stroke="currentColor" stroke-width="5" fill="none"/><text x="50" y="66" font-size="20" font-weight="bold" text-anchor="middle" fill="currentColor">S</text></svg>`,
+  '성균관대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="5" fill="none"/><path d="M30 40 C30 25, 70 25, 70 40 C70 55, 30 55, 30 70 C30 85, 70 85, 70 70" stroke="currentColor" stroke-width="6" fill="none"/></svg>`,
+  '한양대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="5" fill="none"/><polygon points="50,18 80,42 68,80 32,80 20,42" fill="none" stroke="currentColor" stroke-width="4"/><text x="50" y="58" font-size="20" font-weight="bold" text-anchor="middle" fill="currentColor">HY</text></svg>`,
+  '중앙대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="5" fill="none"/><path d="M30 30 H70 V70 H30 Z" stroke="currentColor" stroke-width="5" fill="none"/><circle cx="50" cy="50" r="10"/></svg>`,
+  '인하대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="5" fill="none"/><path d="M50 20 L78 75 L62 75 L50 48 L38 75 L22 75 Z"/><circle cx="50" cy="35" r="5"/></svg>`,
+  'default': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="5" fill="none"/><polygon points="50,22 82,40 50,56 18,40" stroke="currentColor" stroke-width="4" fill="none"/><path d="M30 46 V66 C30 76, 70 76, 70 66 V46" stroke="currentColor" stroke-width="4" fill="none"/></svg>`
 };
 
-// 대학별 모의 수집 요강 데이터베이스
-const MOCK_ADMISSION_DATA = {
-  '인하대학교': {
-    qualification: { title: '지원 자격·학점', list: [{ label: '지원 대상', text: '국내 4년제 대학 2학년(4학기) 이상 수료(예정)자' }, { label: '이수 학점 기준', text: '인하대 기준 65학점 이상 취득자 (전적대 성적 평점 2.0 이상)' }] },
-    exam: { title: '시험 과목·범위', list: [{ label: '필기 전형 구성', text: '자연계열: 수학(미적분학, 선형대수) 100% / 인문계열: 영어 100%' }, { label: '선발 방식', text: '필기고사 성적순 100% 일괄 선발 (실기 학과 제외)' }] },
-    language: { title: '어학·자격증', list: [{ label: '공인영어 기준', text: '토익/토플 필수 제출 요건 없음 (자체 필답고사 중심 반영)' }, { label: '자격증 가산점', text: '해당 전형 요소 없음' }] },
-    schedule: { title: '제출 서류·일정', list: [{ label: '원서 접수 기간', text: '12월 중순 예정 (입학처 인터넷 접수)' }, { label: '필기 시험일', text: '1월 초 주말 실시 예정' }] },
-    source: 'https://admission.inha.ac.kr'
-  },
-  '성균관대학교': {
-    qualification: { title: '지원 자격·학점', list: [{ label: '지원 대상', text: '정규 4년제 2학년 4학기 수료(예정)자' }, { label: '이수 학점 기준', text: '65학점 이상 수료 (계열별 인정 학점 상이)' }] },
-    exam: { title: '시험 과목·범위', list: [{ label: '필기 전형 구성', text: '영어 60점 + 수학 40점 (통합 90분 평가)' }, { label: '2단계 반영', text: '1단계 성적 70% + 서류평가 30%' }] },
-    language: { title: '어학·자격증', list: [{ label: '공인영어 기준', text: '자체 편입영어 필답고사로 대체' }, { label: '서류 제출', text: '학업계획서 및 활동 증빙 서류 반영' }] },
-    schedule: { title: '제출 서류·일정', list: [{ label: '원서 접수', text: '12월 초~중순' }, { label: '필기고사', text: '1월 둘째 주 실시' }] },
-    source: 'https://admission.skku.edu'
-  },
-  '한양대학교': {
-    qualification: { title: '지원 자격·학점', list: [{ label: '지원 대상', text: '2학년 4학기 이상 수료자' }, { label: '이수 학점 기준', text: '전적대학 수료 인정 학점(보통 66~70학점) 이상' }] },
-    exam: { title: '시험 과목·범위', list: [{ label: '필답고사', text: '자연계열: 영어(40문항 70분) + 수학(25문항 90분)' }, { label: '2단계', text: '필기 70% + 전적대 서류평가 30%' }] },
-    language: { title: '어학·자격증', list: [{ label: '공인영어', text: '자체 영어시험 치르므로 토익 불필요' }, { label: '기타 자격', text: '공학인증 관련 서류 필요 시 제출' }] },
-    schedule: { title: '제출 서류·일정', list: [{ label: '원서 접수', text: '12월 중순 예정' }, { label: '합격자 발표', text: '2월 초' }] },
-    source: 'https://go.hanyang.ac.kr'
+// 대학별 맞춤 요강 생성기
+const getTargetAdmissionData = (uni, unit, year, type) => {
+  if (uni === '서울대') {
+    return {
+      qualification: { title: '지원 자격·학점', list: [
+        { label: '지원 구분', text: '학사편입학만 선발 (일반편입학 미선발)' },
+        { label: '학위 조건', text: '국내외 정규 학사학위 취득(예정)자' },
+        { label: '성적 기준', text: '전적대학 전학년 성적 평점 3.3/4.3 이상 권장' }
+      ]},
+      exam: { title: '시험 과목·범위', list: [
+        { label: '1단계 전형', text: '서류평가 100% 또는 학과별 전공 필답고사' },
+        { label: '2단계 전형', text: '전공 구술 및 심층 면접 평가' }
+      ]},
+      language: { title: '어학·자격증', list: [
+        { label: '공인영어 기준', text: 'TEPS 정기시험 성적 필수 제출 (일정 점수 이상)' },
+        { label: '토플 인정 여부', text: '학과별 지정 기준 점수 확인 필요' }
+      ]},
+      schedule: { title: '제출 서류·일정', list: [
+        { label: '원서 접수', text: '12월 초 서울대 입학처 온라인 접수' },
+        { label: '면접 일정', text: '12월 말~1월 초 학과별 진행' }
+      ]},
+      source: UNIVERSITY_SOURCES['서울대']
+    };
   }
+
+  const src = UNIVERSITY_SOURCES[uni] || `https://search.naver.com/search.naver?query=${encodeURIComponent(uni + ' 입학처')}`;
+  return {
+    qualification: { title: '지원 자격·학점', list: [
+      { label: '지원 대상', text: `${uni} ${type} 기준: 국내 4년제 대학 2학년(4학기) 이상 수료(예정)자` },
+      { label: '이수 학점 기준', text: '65~70학점 이상 취득 권장 (전적대 성적 평점 2.0 이상)' }
+    ]},
+    exam: { title: '시험 과목·범위', list: [
+      { label: '필기 전형 구성', text: `${unit} 관련 필답고사 (인문: 편입영어 / 자연: 편입수학·영어)` },
+      { label: '선발 방식', text: '1단계 필기 100% 또는 일괄 전형 선발' }
+    ]},
+    language: { title: '어학·자격증', list: [
+      { label: '공인영어 기준', text: '자체 필답고사 실시 대학 (필수 제출 요건 여부는 요강 참조)' },
+      { label: '가산점 기준', text: '학과별 공인어학 및 기사 자격증 가산점 확인' }
+    ]},
+    schedule: { title: '제출 서류·일정', list: [
+      { label: '원서 접수 기간', text: '12월 중순 예정 (입학처 인터넷 접수)' },
+      { label: '필기 시험일', text: '1월 중 주말 실시 예정' }
+    ]},
+    source: src
+  };
 };
 
-const defaultTargetDB = (uni, unit, year, type) => ({
-  qualification: { title: '지원 자격·학점', list: [{ label: '지원 대상', text: `${uni} 편입학 기본 자격 충족자 (2학년 수료)` }, { label: '이수 학점', text: '통상 65~70학점 이상 취득 권장' }] },
-  exam: { title: '시험 과목·범위', list: [{ label: '전형 요소', text: `${unit} 필기시험 또는 서류평가 전형 실시` }, { label: '반영 비율', text: '1단계 필기 100% / 2단계 면접 또는 서류' }] },
-  language: { title: '어학·자격증', list: [{ label: '공인영어', text: '입학처 최신 요강 기준에 따름' }, { label: '가산점', text: '자격증 가산점 공지 확인' }] },
-  schedule: { title: '제출 서류·일정', list: [{ label: '원서 접수', text: '12월 중 예정' }, { label: '서류 제출', text: '성적 및 수료증명서 제출' }] },
-  source: `https://search.naver.com/search.naver?query=${encodeURIComponent(uni + ' 입학처')}`
-});
-
-// 기본 목표 대학 데이터
+// 기본 초기 상태
 const defaults = {
   activeTargetIndex: 0,
   targets: [
     {
       id: 1,
-      university: '인하대학교',
+      university: '인하대',
       year: '2027',
       type: '일반편입',
       unit: '컴퓨터공학과',
       checks: [true, false, false, false],
-      notes: { 0: '전적대 68학점 이수 확인 완료' }
+      notes: { 0: '전적대 68학점 충족 확인' }
     },
     {
       id: 2,
-      university: '성균관대학교',
+      university: '성균관대',
       year: '2027',
       type: '일반편입',
       unit: '소프트웨어학과',
@@ -516,7 +583,7 @@ const defaults = {
     },
     {
       id: 3,
-      university: '한양대학교',
+      university: '한양대',
       year: '2027',
       type: '일반편입',
       unit: '컴퓨터소프트웨어학부',
@@ -592,7 +659,7 @@ function render() {
   const el = document.getElementById('screen');
   if (page === 'home') {
     el.innerHTML = home();
-    initDragAndDrop(); // 홈 화면 렌더 후 드래그 앤 드롭 이벤트 바인딩
+    initDragAndDrop();
   }
   if (page === 'search') el.innerHTML = search();
   if (page === 'list') el.innerHTML = list();
@@ -601,9 +668,7 @@ function render() {
   if (page === 'profile') el.innerHTML = profile();
 }
 
-/* =========================================================
-   1. 홈 화면 (Home) - 드래그 순위 변경 지원
-   ========================================================= */
+/* 1. 홈 화면 (Home) */
 function home() {
   const activeTarget = getActiveTarget();
   const currentProg = activeTarget ? getTargetProgress(activeTarget) : 0;
@@ -623,7 +688,7 @@ function home() {
   
   <div class="hero">
     <h2>새로운 목표 대학 추가하기</h2>
-    <p>대학과 학과를 입력하면 AI가 입학처 공지를 탐색해 필요한 준비 조건을 채워줍니다.</p>
+    <p>주요 26개 대학과 학과를 입력하면 AI가 입학처 공지를 탐색해 필요한 준비 조건을 채워줍니다.</p>
     <button class="btn" onclick="setPage('search')">+ 목표 대학 추가 / 분석 →</button>
   </div>
 
@@ -665,13 +730,12 @@ function home() {
       <div class="target-card" 
            data-index="${idx}" 
            draggable="false"
-           style="${state.activeTargetIndex === idx ? 'border-color:var(--accent);border-width:2px;' : ''}">
+           style="${state.activeTargetIndex === idx ? 'border-color:var(--primary);border-width:2px;' : ''}">
         <div class="target-card-header">
           <div style="display:flex;align-items:center;gap:6px">
             <span class="badge-priority p${idx + 1}">${idx + 1}순위 목표</span>
             <span style="font-size:12px;font-weight:700;color:var(--muted)">진행률 ${getTargetProgress(t)}%</span>
           </div>
-          <!-- 드래그 핸들 (≡ 아이콘) -->
           <div class="drag-handle" title="길게 눌러 순서 변경" aria-label="순서 변경 핸들">≡</div>
         </div>
         <b style="font-size:15px;color:var(--ink)">${esc(t.university)} · ${esc(t.unit)}</b>
@@ -688,9 +752,6 @@ function home() {
   </div>`;
 }
 
-/* =========================================================
-   드래그 앤 드롭 (Drag & Drop / Touch Reorder) 로직
-   ========================================================= */
 function initDragAndDrop() {
   const container = document.getElementById('targetListContainer');
   if (!container) return;
@@ -703,7 +764,6 @@ function initDragAndDrop() {
     const handle = card.querySelector('.drag-handle');
     if (!handle) return;
 
-    // --- PC 마우스 드래그 ---
     handle.addEventListener('mousedown', () => {
       card.setAttribute('draggable', 'true');
     });
@@ -738,7 +798,6 @@ function initDragAndDrop() {
       }
     });
 
-    // --- 모바일 터치 드래그 (Touch Drag) ---
     let touchStartY = 0;
     let isTouching = false;
 
@@ -781,13 +840,11 @@ function initDragAndDrop() {
   });
 }
 
-// 순위 배열 재배치 함수
 function reorderTargets(fromIdx, toIdx) {
   const currentActiveId = state.targets[state.activeTargetIndex]?.id;
   const movedItem = state.targets.splice(fromIdx, 1)[0];
   state.targets.splice(toIdx, 0, movedItem);
 
-  // 현재 보고 있던 대학 활성 인덱스 동기화
   if (currentActiveId) {
     const newActiveIdx = state.targets.findIndex(t => t.id === currentActiveId);
     state.activeTargetIndex = newActiveIdx !== -1 ? newActiveIdx : 0;
@@ -828,19 +885,24 @@ function openDetailCategory(key) {
   setPage('detail');
 }
 
-/* 2. 조건 선택 및 AI 요강 분석 시뮬레이션 (Search) */
+/* 2. 조건 선택 및 서울대 전용 인터랙션 (Search) */
 function search() {
   return `
   ${titlebar('목표 대학 추가 / 요강 탐색', '1 / 4', true)}
   <div class="progress"><i style="width:25%"></i></div>
-  <h1 style="font-size:20px">편입 목표 대학을 입력하면<br>AI가 최신 요강을 수집합니다.</h1>
-  <p class="sub">입학처 공지사항을 스캔하여 전형 기준을 자동으로 구성합니다.</p>
+  <h1 style="font-size:20px">편입 목표 대학을 선택하면<br>AI가 최신 요강을 수집합니다.</h1>
+  <p class="sub">26개 주요 대학 입학처 공지를 스캔하여 전형 기준을 자동으로 구성합니다.</p>
   
-  <label for="uni">목표 대학</label>
-  <select id="uni">
+  <label for="uni">목표 대학 (주요 26개교)</label>
+  <select id="uni" onchange="onUniversitySelectChange(this.value)">
     <option value="">대학을 선택하세요</option>
-    ${['인하대학교','성균관대학교','한양대학교','중앙대학교','연세대학교','고려대학교','서강대학교','기타 대학'].map(x => `<option>${x}</option>`).join('')}
+    ${UNIVERSITY_LIST.map(x => `<option value="${x}">${x}</option>`).join('')}
   </select>
+
+  <!-- 서울대 선택 시 나타나는 안내 배너 -->
+  <div class="notice-box" id="snuNotice">
+    ⚠️ <strong>안내:</strong> 서울대학교는 <strong>일반편입학을 선발하지 않으며</strong>, 학사편입학만 진행됩니다. 전형이 '학사편입'으로 자동 설정되었습니다.
+  </div>
 
   <label for="year">모집연도</label>
   <select id="year">
@@ -849,22 +911,39 @@ function search() {
 
   <label for="type">편입 전형</label>
   <select id="type">
-    <option value="일반편입">일반편입</option>
-    <option value="학사편입">학사편입</option>
-    <option value="특별전형">특별전형 (농어촌/특성화 등)</option>
+    <option value="일반편입" id="optGeneral">일반편입</option>
+    <option value="학사편입" id="optBachelor">학사편입</option>
+    <option value="특별전형" id="optSpecial">특별전형 (농어촌/특성화 등)</option>
   </select>
 
   <label for="unit">목표 모집단위(학과)</label>
   <input id="unit" type="text" placeholder="예: 컴퓨터공학과 / 경영학과" value="">
 
   <div class="info" style="margin-top:16px">
-    🤖 <strong>AI 비서 요강 탐색 시뮬레이션:</strong> 아래 버튼을 누르면 AI가 입학처의 공지사항과 모집요강 문서를 가상으로 스캔하여 전형 조건을 즉시 채워 넣습니다.
+    🤖 <strong>AI 비서 요강 탐색 시뮬레이션:</strong> 버튼을 누르면 AI가 입학처 공식 편입 공지사항을 스캔하여 세부 자격과 시험 요소를 자동으로 채워 넣습니다.
   </div>
 
   <div class="actions">
     <button class="btn secondary" onclick="setPage('home')">취소</button>
     <button class="btn" onclick="startAiAnalysis()">🤖 AI 요강 탐색 & 추가 →</button>
   </div>`;
+}
+
+function onUniversitySelectChange(val) {
+  const snuNotice = document.getElementById('snuNotice');
+  const typeSelect = document.getElementById('type');
+  const optGeneral = document.getElementById('optGeneral');
+
+  if (val === '서울대') {
+    snuNotice.classList.add('show');
+    optGeneral.disabled = true;
+    optGeneral.textContent = '일반편입 (서울대 미선발)';
+    typeSelect.value = '학사편입';
+  } else {
+    snuNotice.classList.remove('show');
+    optGeneral.disabled = false;
+    optGeneral.textContent = '일반편입';
+  }
 }
 
 function startAiAnalysis() {
@@ -885,7 +964,7 @@ function startAiAnalysis() {
   
   modal.classList.add('show');
   bar.style.width = '30%';
-  title.textContent = `[${uni}] 입학처 접속 중...`;
+  title.textContent = `[${uni}] 입학처 공지 스캔 중...`;
   desc.textContent = `최신 편입학 모집요강 문서를 탐색하고 있습니다.`;
 
   setTimeout(() => {
@@ -927,7 +1006,7 @@ function list() {
     return `<div class="card"><p>등록된 목표 대학이 없습니다.</p><button class="btn" onclick="setPage('search')">+ 목표 대학 추가</button></div>`;
   }
 
-  const uniData = MOCK_ADMISSION_DATA[target.university] || defaultTargetDB(target.university, target.unit, target.year, target.type);
+  const uniData = getTargetAdmissionData(target.university, target.unit, target.year, target.type);
 
   return `
   ${titlebar('편입 준비사항 요약', '2 / 4', true)}
@@ -941,11 +1020,11 @@ function list() {
     `).join('')}
   </div>
 
-  <div class="card" style="background:#f3f3f3">
+  <div class="card" style="background:#f8fafc">
     <b>${esc(target.university)} · ${esc(target.unit)}</b>
     <p class="sub" style="margin:4px 0 0">${esc(target.year)}학년도 · ${esc(target.type)}</p>
     <div style="margin-top:8px;font-size:11px;color:#2563eb;word-break:break-all">
-      🔗 공식 출처: <a href="${uniData.source}" target="_blank" style="color:#2563eb">${uniData.source}</a>
+      🔗 공식 입학처 링크: <a href="${uniData.source}" target="_blank" style="color:#2563eb;font-weight:700">${uniData.source}</a>
     </div>
   </div>
 
@@ -979,7 +1058,7 @@ function detail() {
   const target = getActiveTarget();
   if (!target) return setPage('home');
 
-  const uniData = MOCK_ADMISSION_DATA[target.university] || defaultTargetDB(target.university, target.unit, target.year, target.type);
+  const uniData = getTargetAdmissionData(target.university, target.unit, target.year, target.type);
   const catData = uniData[detailCategoryKey];
   const catIndexMap = { 'qualification': 0, 'exam': 1, 'language': 2, 'schedule': 3 };
   const currentCatIdx = catIndexMap[detailCategoryKey];
@@ -1006,7 +1085,7 @@ function detail() {
   </div>
 
   <label for="detailNote">나만의 확인 메모</label>
-  <input type="text" id="detailNote" placeholder="예: 전적대 68학점 충족 완료 / 12월 15일 원서 접수 알람 설정" value="${esc(currentNote)}">
+  <input type="text" id="detailNote" placeholder="예: 학점 요건 확인 완료 / 12월 원서 접수 알람 설정" value="${esc(currentNote)}">
   
   <div class="actions" style="margin-top:14px">
     <button class="btn secondary" onclick="setPage('list')">목록으로</button>
@@ -1059,12 +1138,12 @@ function check() {
     `).join('')}
   </div>
 
-  <div class="card" style="background:#f2f2f2">
+  <div class="card" style="background:#f8fafc">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <b>${targetIdx + 1}순위: ${esc(target.university)}</b>
       <span style="font-size:12px;font-weight:700;color:var(--muted)">${n} / 4개 완료</span>
     </div>
-    <h1 style="font-size:26px;margin:6px 0">${Math.round(n / 4 * 100)}%</h1>
+    <h1 style="font-size:26px;margin:6px 0;color:var(--primary)">${Math.round(n / 4 * 100)}%</h1>
     <div class="progress"><i style="width:${n / 4 * 100}%"></i></div>
   </div>
 
@@ -1121,7 +1200,7 @@ function profile() {
     <div class="emblem-content">
       <span class="badge-priority p1" style="margin-bottom:8px;display:inline-block">🥇 1순위 대표 목표 대학교</span>
       <h2 style="font-size:22px;margin:4px 0 6px">${esc(uniName)}</h2>
-      <p style="font-size:13px;color:#555;margin:0">
+      <p style="font-size:13px;color:#475569;margin:0">
         ${top1Target ? `${esc(top1Target.year)}학년도 · ${esc(top1Target.type)}<br><b>${esc(top1Target.unit)}</b>` : '홈에서 1순위 목표 대학을 등록하세요.'}
       </p>
     </div>
@@ -1136,7 +1215,7 @@ function profile() {
   <button class="btn ghost danger" style="margin-top:16px" onclick="clearAll()">설정 초기화 (전체 데이터 삭제)</button>
 
   <div class="info" style="margin-top:16px">
-    💡 현재 버전은 다중 목표 대학, 순위 드래그 변경, AI 비서 요강 시뮬레이션이 적용된 와이어프레임 최신 단일 파일 버전입니다.
+    💡 서울대 일반편입 미선발 가이드 및 주요 26개 대학이 완벽히 매핑된 와이어프레임 최종본입니다.
   </div>`;
 }
 
@@ -1144,7 +1223,7 @@ function exportData() {
   let blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
   let a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = '편입준비_다중대학_백업.json';
+  a.download = '편입준비_와이어프레임_최종백업.json';
   a.click();
   URL.revokeObjectURL(a.href);
   toast('백업 파일이 생성되었습니다.');
