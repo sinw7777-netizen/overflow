@@ -11,13 +11,14 @@
 <body>
 
 <div class="app-wrapper">
-  <!-- 상단 헤더 -->
+  <!-- 상단 헤더: 브랜드 및 로그인/사용자 칩 -->
   <header>
     <div class="brand">
       <div class="brand-icon">P</div>
       편입 준비 한눈에
     </div>
-    <div class="brand-pill">AI ASSISTANT</div>
+    <!-- AI ASSISTANT 자리에 위치하는 로그인/계정 영역 -->
+    <div class="header-auth-box" id="headerAuthArea"></div>
   </header>
 
   <!-- 메인 동적 화면 컨테이너 -->
@@ -30,6 +31,23 @@
     <button class="nav-tab-btn" data-page="check"><span class="nav-icon">☑</span>체크리스트</button>
     <button class="nav-tab-btn" data-page="profile"><span class="nav-icon">○</span>설정</button>
   </nav>
+
+  <!-- 로그인 전용 모달 -->
+  <div class="login-modal-overlay" id="loginOverlay">
+    <div class="login-modal-window">
+      <div class="login-modal-header">
+        <h3>수험생 로그인</h3>
+        <button class="btn-close-modal" onclick="closeLoginModal()" aria-label="닫기">✕</button>
+      </div>
+      <p class="sub" style="margin-bottom:14px">로그인 시 목표 대학과 준비 현황이 계정에 안전하게 동기화됩니다.</p>
+      <div class="login-fields">
+        <input type="email" id="loginEmail" placeholder="이메일 아이디 (예: student@transfer.kr)" value="student@transfer.kr">
+        <input type="password" id="loginPw" placeholder="비밀번호" value="••••••••">
+      </div>
+      <button class="btn" style="margin-bottom:8px" onclick="executeLogin()">로그인하기</button>
+      <button class="btn secondary" style="min-height:42px;font-size:13px" onclick="quickDemoLogin()">⚡ 1초 데모 계정으로 로그인</button>
+    </div>
+  </div>
 
   <!-- AI 입학처 탐색 시뮬레이션 모달 -->
   <div class="ai-modal-overlay" id="aiOverlay">
