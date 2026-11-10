@@ -17,7 +17,7 @@
       <div class="brand-icon">P</div>
       편입 준비 한눈에
     </div>
-    <!-- AI ASSISTANT 자리에 위치하는 로그인/계정 영역 -->
+    <!-- AI ASSISTANT 자리에 로그인/사용자 프로필 칩 배치 -->
     <div class="header-auth-box" id="headerAuthArea"></div>
   </header>
 
@@ -41,11 +41,16 @@
       </div>
       <p class="sub" style="margin-bottom:14px">로그인 시 목표 대학과 준비 현황이 계정에 안전하게 동기화됩니다.</p>
       <div class="login-fields">
-        <input type="email" id="loginEmail" placeholder="이메일 아이디 (예: student@transfer.kr)" value="student@transfer.kr">
-        <input type="password" id="loginPw" placeholder="비밀번호" value="••••••••">
+        <input type="text" id="loginId" placeholder="아이디" value="overflow7777">
+        <input type="password" id="loginPw" placeholder="비밀번호" value="12345678">
       </div>
-      <button class="btn" style="margin-bottom:8px" onclick="executeLogin()">로그인하기</button>
-      <button class="btn secondary" style="min-height:42px;font-size:13px" onclick="quickDemoLogin()">⚡ 1초 데모 계정으로 로그인</button>
+      <!-- 개인정보 처리약관 동의 체크박스 -->
+      <label class="login-agree-label">
+        <input type="checkbox" id="loginAgree" checked>
+        <span>[필수] 개인정보 수집 및 이용에 동의합니다.</span>
+      </label>
+      <button class="btn" style="margin-top:10px;margin-bottom:8px" onclick="executeLogin()">로그인하기</button>
+      <button class="btn secondary" style="min-height:42px;font-size:13px" onclick="quickDemoLogin()">⚡ '오버플로우' 계정으로 1초 로그인</button>
     </div>
   </div>
 
