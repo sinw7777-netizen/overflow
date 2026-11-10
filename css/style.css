@@ -102,7 +102,6 @@ header {
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
 }
 
-/* 상단 우측 로그인/사용자 칩 */
 .header-auth-box {
   display: flex;
   align-items: center;
