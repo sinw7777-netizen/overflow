@@ -67,8 +67,8 @@ button { cursor: pointer; border: none; background: none; }
 }
 
 header {
-  padding: 16px 20px 14px;
-  background: rgba(255, 255, 255, 0.92);
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
   display: flex;
@@ -102,14 +102,43 @@ header {
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
 }
 
-.brand-pill {
-  font-size: 10px;
+/* 상단 우측 로그인/사용자 칩 */
+.header-auth-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-login-header {
+  font-size: 11.5px;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 5px 12px;
   border-radius: 20px;
-  background: var(--primary-light);
-  color: var(--primary);
-  letter-spacing: 0.05em;
+  background: var(--primary);
+  color: white;
+  transition: all .15s ease;
+  box-shadow: 0 2px 6px var(--primary-glow);
+}
+.btn-login-header:active { transform: scale(0.96); opacity: 0.9; }
+
+.user-profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink-700);
+  cursor: pointer;
+}
+.user-profile-chip:active { background: #e2e8f0; }
+.user-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
 }
 
 main {
@@ -351,7 +380,7 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
 
 /* 폼 컨트롤 */
 label { display: block; font-size: 13px; font-weight: 700; color: var(--ink-700); margin: 14px 0 6px; }
-select, input[type=text] {
+select, input[type=text], input[type=password], input[type=email] {
   width: 100%;
   padding: 12px 14px;
   border: 1px solid var(--line-strong);
@@ -362,7 +391,7 @@ select, input[type=text] {
   font-size: 14px;
   transition: border-color .15s;
 }
-select:focus, input[type=text]:focus {
+select:focus, input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-glow);
@@ -491,6 +520,44 @@ select:focus, input[type=text]:focus {
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+/* 로그인 전용 모달 */
+.login-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 110;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+}
+.login-modal-overlay.show { opacity: 1; pointer-events: auto; }
+.login-modal-window {
+  background: #ffffff;
+  width: min(350px, 90%);
+  border-radius: var(--radius-lg);
+  padding: 26px 22px;
+  box-shadow: var(--shadow-float);
+  position: relative;
+}
+.login-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.login-modal-header h3 { font-size: 18px; font-weight: 800; color: var(--ink-900); }
+.btn-close-modal {
+  font-size: 20px;
+  color: var(--ink-400);
+  line-height: 1;
+  padding: 4px;
+}
+.login-fields { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+
 /* =========================================================
    하단 내비게이션 바: 메인 화면과 구분되게 은은한 회색 적용
    ========================================================= */
@@ -498,7 +565,7 @@ select:focus, input[type=text]:focus {
   position: sticky;
   bottom: 0;
   width: 100%;
-  background: var(--nav-bg); /* 은은한 회색 톤 분리 */
+  background: var(--nav-bg);
   border-top: 1px solid var(--line-strong);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
