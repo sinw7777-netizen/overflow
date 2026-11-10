@@ -350,7 +350,6 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
 }
 .card-actions > * { flex: 1; }
 
-/* 대학 전환 가로 스크롤 탭 */
 .tab-scroll-wrap {
   display: flex;
   gap: 6px;
@@ -378,7 +377,6 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   box-shadow: var(--shadow-sm);
 }
 
-/* 폼 컨트롤 */
 label { display: block; font-size: 13px; font-weight: 700; color: var(--ink-700); margin: 14px 0 6px; }
 select, input[type=text], input[type=password], input[type=email] {
   width: 100%;
@@ -410,7 +408,6 @@ select:focus, input[type=text]:focus, input[type=password]:focus, input[type=ema
 }
 .notice-banner.show { display: block; }
 
-/* 안내 박스 및 리스트 */
 .guide-card {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -457,7 +454,6 @@ select:focus, input[type=text]:focus, input[type=password]:focus, input[type=ema
 }
 .check-item small { display: block; font-size: 11.5px; color: var(--ink-500); margin-top: 3px; }
 
-/* 엠블럼 워터마크 카드 (설정 탭) */
 .emblem-showcase-card {
   position: relative;
   overflow: hidden;
@@ -483,7 +479,6 @@ select:focus, input[type=text]:focus, input[type=password]:focus, input[type=ema
   z-index: 2;
 }
 
-/* AI 시뮬레이션 모달 */
 .ai-modal-overlay {
   position: absolute;
   inset: 0;
@@ -556,11 +551,52 @@ select:focus, input[type=text]:focus, input[type=password]:focus, input[type=ema
   line-height: 1;
   padding: 4px;
 }
-.login-fields { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.login-fields { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
 
-/* =========================================================
-   하단 내비게이션 바: 메인 화면과 구분되게 은은한 회색 적용
-   ========================================================= */
+/* 개인정보 처리약관 동의 체크박스 */
+.login-agree-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-700);
+  cursor: pointer;
+  margin: 4px 0 6px;
+  user-select: none;
+}
+.login-agree-label input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--primary);
+  cursor: pointer;
+  margin: 0;
+}
+
+/* 설정 탭 하단 개인정보 처리약관 카드 */
+.privacy-terms-card {
+  margin-top: 22px;
+  padding: 14px 16px;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--ink-500);
+  line-height: 1.6;
+}
+.privacy-terms-card h4 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-700);
+  margin-bottom: 6px;
+}
+.privacy-terms-card p {
+  margin-bottom: 4px;
+}
+.privacy-terms-card p:last-child {
+  margin-bottom: 0;
+}
+
+/* 하단 내비게이션 바: 메인 화면과 구분되게 은은한 회색 적용 */
 .nav-bottom-bar {
   position: sticky;
   bottom: 0;
