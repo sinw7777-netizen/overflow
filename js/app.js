@@ -1,6 +1,6 @@
 const STORAGE_KEY = 'transfer_prep_prototype_v1';
 
-// 전역 대학 데이터 저장소 (data/universities.json에서 비동기 로드)
+// 기본 내장 대학 데이터 (로컬 실행 폴백용) + data/universities.json 비동기 연동
 let UNIV_DATA = {
   universityList: [
     '서울대', '연세대(신촌)', '고려대(서울)', '서강대', '성균관대', '한양대',
@@ -9,27 +9,129 @@ let UNIV_DATA = {
     '단국대', '광운대', '인하대', '아주대', '서울과기대', '가천대',
     '경기대', '성신여대'
   ],
-  sources: {},
-  emblems: {},
-  defaultCriteria: {},
-  specialCriteria: {}
+  sources: {
+    '서울대': 'https://admission.snu.ac.kr/transfer/notice?sc=y',
+    '연세대(신촌)': 'https://admission.yonsei.ac.kr/seoul/',
+    '고려대(서울)': 'https://oku.korea.ac.kr/oku/cms/FR_CON/index.do?MENU_ID=1770',
+    '서강대': 'https://admission.sogang.ac.kr/enter/html/transfer/notice.asp',
+    '성균관대': 'https://admission.skku.edu/admission/html/transfer/notice.html',
+    '한양대': 'https://go.hanyang.ac.kr/',
+    '중앙대': 'https://admission.cau.ac.kr/',
+    '이화여대': 'https://admission.ewha.ac.kr/',
+    '경희대': 'https://iphak.khu.ac.kr/',
+    '한국외대': 'https://adms.hufs.ac.kr/',
+    '서울시립대': 'https://admission.uos.ac.kr/admissionNew/noticeBoard/list.do?list_id=OB1&menuid=2002004001000000000',
+    '건국대': 'https://admission.konkuk.ac.kr/admission/37887/subview.do',
+    '동국대': 'https://ipsi.dongguk.edu/admission/html/transfer/notice.asp',
+    '홍익대': 'https://admission.hongik.ac.kr/',
+    '숙명여대': 'https://admission.sookmyung.ac.kr/',
+    '성신여대': 'https://ipsi.sungshin.ac.kr/',
+    '국민대': 'https://admission.kookmin.ac.kr/',
+    '숭실대': 'https://iphak.ssu.ac.kr/',
+    '세종대': 'https://ipsi.sejong.ac.kr/',
+    '단국대': 'https://ipsi.dankook.ac.kr/',
+    '광운대': 'https://iphak.kw.ac.kr/help/notice_list.php?nPage=1',
+    '인하대': 'https://admission.inha.ac.kr/cms/FR_CON/index.do?MENU_ID=210',
+    '아주대': 'https://www.iajou.ac.kr/',
+    '서울과기대': 'https://admission.seoultech.ac.kr/',
+    '가천대': 'https://admission.gachon.ac.kr/admission/html/transfer/notice.asp',
+    '경기대': 'https://enter.kyonggi.ac.kr/'
+  },
+  emblems: {
+    '서울대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><path d="M22 68 L50 20 L78 68 Z" stroke="currentColor" stroke-width="3.5" fill="none"/><circle cx="50" cy="46" r="8" fill="none" stroke="currentColor" stroke-width="3"/><path d="M38 74 H62 M42 78 H58" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><text x="50" y="87" font-size="8.5" font-weight="900" text-anchor="middle" fill="currentColor" letter-spacing="1">VERITAS</text></svg>`,
+    '연세대(신촌)': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><circle cx="50" cy="36" r="14" stroke="currentColor" stroke-width="4" fill="none"/><polygon points="26,74 74,74 50,48" stroke="currentColor" stroke-width="3.5" fill="none"/><path d="M42 36 H58 M50 28 V44" stroke="currentColor" stroke-width="2.5"/><text x="50" y="88" font-size="8.5" font-weight="900" text-anchor="middle" fill="currentColor">YONSEI</text></svg>`,
+    '고려대(서울)': `<svg viewBox="0 0 100 100" fill="currentColor"><polygon points="50,14 82,34 72,82 50,92 28,82 18,34" stroke="currentColor" stroke-width="4" fill="none"/><path d="M36 42 Q50 32 64 42 Q60 56 50 64 Q40 56 36 42 Z" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="43" cy="46" r="2.5"/><circle cx="57" cy="46" r="2.5"/><polygon points="50,52 46,57 54,57"/><text x="50" y="80" font-size="16" font-weight="900" text-anchor="middle" fill="currentColor">KU</text></svg>`,
+    '서강대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><polygon points="50,20 80,78 20,78" stroke="currentColor" stroke-width="4.5" fill="none"/><path d="M40 78 L50 48 L60 78" stroke="currentColor" stroke-width="3" fill="none"/><text x="50" y="44" font-size="20" font-weight="900" text-anchor="middle" fill="currentColor">S</text><text x="50" y="90" font-size="8" font-weight="bold" text-anchor="middle" fill="currentColor">SOGANG</text></svg>`,
+    '성균관대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><path d="M50 78 C35 60 22 45 32 26 C42 16 58 16 68 26 C78 45 65 60 50 78 Z" stroke="currentColor" stroke-width="3.5" fill="none"/><path d="M50 78 V38" stroke="currentColor" stroke-width="3"/><text x="50" y="89" font-size="8.5" font-weight="900" text-anchor="middle" fill="currentColor">SKKU 1398</text></svg>`,
+    '한양대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><path d="M30 46 C25 25 75 25 70 46 C65 62 35 62 30 46 Z" stroke="currentColor" stroke-width="3.5" fill="none"/><text x="50" y="52" font-size="18" font-weight="900" text-anchor="middle" fill="currentColor">HY</text><text x="50" y="82" font-size="9" font-weight="bold" text-anchor="middle" fill="currentColor">HANYANG</text></svg>`,
+    '중앙대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><rect x="28" y="28" width="44" height="44" rx="8" stroke="currentColor" stroke-width="4" fill="none"/><circle cx="50" cy="50" r="12" stroke="currentColor" stroke-width="3" fill="none"/><text x="50" y="88" font-size="9" font-weight="900" text-anchor="middle" fill="currentColor">CAU 1918</text></svg>`,
+    '이화여대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><path d="M50 20 C54 32 46 32 50 44 C40 40 40 48 28 44 C38 52 38 60 28 66 C40 64 40 72 50 68 C46 80 54 80 50 92 C58 80 58 72 70 76 C62 68 62 60 74 56 C62 50 62 42 70 36 C58 38 58 28 50 20 Z" fill="none" stroke="currentColor" stroke-width="2.5"/><text x="50" y="55" font-size="11" font-weight="bold" text-anchor="middle" fill="currentColor">EWHA</text></svg>`,
+    '경희대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><ellipse cx="50" cy="50" rx="28" ry="18" stroke="currentColor" stroke-width="2.5" fill="none"/><ellipse cx="50" cy="50" rx="18" ry="28" stroke="currentColor" stroke-width="2.5" fill="none"/><line x1="22" y1="50" x2="78" y2="50" stroke="currentColor" stroke-width="2.5"/><text x="50" y="88" font-size="8.5" font-weight="900" text-anchor="middle" fill="currentColor">KYUNG HEE</text></svg>`,
+    '한국외대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><circle cx="42" cy="40" r="8" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="58" cy="40" r="8" stroke="currentColor" stroke-width="3" fill="none"/><polygon points="50,46 46,54 54,54"/><path d="M30 68 C35 58 65 58 70 68" stroke="currentColor" stroke-width="3.5" fill="none"/><text x="50" y="86" font-size="9" font-weight="900" text-anchor="middle" fill="currentColor">HUFS</text></svg>`,
+    '서울시립대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><path d="M26 72 L50 26 L74 72" stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/><line x1="36" y1="56" x2="64" y2="56" stroke="currentColor" stroke-width="4"/><text x="50" y="88" font-size="9" font-weight="900" text-anchor="middle" fill="currentColor">UOS</text></svg>`,
+    '건국대': `<svg viewBox="0 0 100 100" fill="currentColor"><polygon points="50,14 84,34 72,82 50,90 28,82 16,34" stroke="currentColor" stroke-width="4" fill="none"/><path d="M32 38 C34 54 66 54 68 38 C76 30 80 44 68 56 C60 64 40 64 32 56 C20 44 24 30 32 38 Z" stroke="currentColor" stroke-width="3" fill="none"/><text x="50" y="78" font-size="11" font-weight="900" text-anchor="middle" fill="currentColor">KONKUK</text></svg>`,
+    '동국대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><path d="M36 34 C36 24 64 24 64 34 C64 46 72 52 70 66 C64 68 56 64 54 58 C50 64 40 64 36 54 Z" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="44" cy="38" r="2"/><text x="50" y="86" font-size="9" font-weight="900" text-anchor="middle" fill="currentColor">DONGGUK</text></svg>`,
+    '홍익대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><path d="M26 62 Q50 30 74 62 Q50 48 26 62 Z" stroke="currentColor" stroke-width="3.5" fill="none"/><line x1="50" y1="26" x2="50" y2="76" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><text x="50" y="88" font-size="9" font-weight="900" text-anchor="middle" fill="currentColor">HONGIK</text></svg>`,
+    '숙명여대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><path d="M50 22 V78 M22 50 H78 M30 30 L70 70 M30 70 L70 30" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="50" cy="50" r="6" fill="currentColor"/><text x="50" y="90" font-size="8.5" font-weight="bold" text-anchor="middle" fill="currentColor">SOOKMYUNG</text></svg>`,
+    '국민대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><rect x="28" y="32" width="44" height="36" rx="4" stroke="currentColor" stroke-width="4" fill="none"/><path d="M28 50 H72 M50 32 V68" stroke="currentColor" stroke-width="3"/><text x="50" y="86" font-size="8.5" font-weight="900" text-anchor="middle" fill="currentColor">KOOKMIN</text></svg>`,
+    '숭실대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><path d="M34 68 Q38 42 54 36 Q64 32 68 44 Q56 46 54 58 Q66 56 68 68 Z" stroke="currentColor" stroke-width="3" fill="none"/><line x1="50" y1="20" x2="50" y2="34" stroke="currentColor" stroke-width="3"/><line x1="43" y1="25" x2="57" y2="25" stroke="currentColor" stroke-width="3"/><text x="50" y="86" font-size="9" font-weight="900" text-anchor="middle" fill="currentColor">SOONGSIL</text></svg>`,
+    '세종대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><circle cx="50" cy="38" r="10" stroke="currentColor" stroke-width="3.5" fill="none"/><line x1="26" y1="62" x2="74" y2="62" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><line x1="50" y1="48" x2="50" y2="76" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><text x="50" y="88" font-size="9" font-weight="900" text-anchor="middle" fill="currentColor">SEJONG</text></svg>`,
+    '단국대': `<svg viewBox="0 0 100 100" fill="currentColor"><polygon points="50,14 84,34 72,82 50,90 28,82 16,34" stroke="currentColor" stroke-width="4" fill="none"/><path d="M34 40 C34 30 44 26 50 34 C56 26 66 30 66 40 C66 54 50 66 50 66 C50 66 34 54 34 40 Z" stroke="currentColor" stroke-width="3" fill="none"/><text x="50" y="80" font-size="10" font-weight="900" text-anchor="middle" fill="currentColor">DANKOOK</text></svg>`,
+    '광운대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><path d="M30 64 C35 44 48 40 56 32 C62 44 72 40 70 64" stroke="currentColor" stroke-width="3.5" fill="none"/><path d="M42 42 L66 24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><text x="50" y="84" font-size="9" font-weight="900" text-anchor="middle" fill="currentColor">KWANGWOON</text></svg>`,
+    '인하대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><path d="M50 20 L78 74 L62 74 L50 50 L38 74 L22 74 Z" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="50" cy="36" r="5" fill="currentColor"/><text x="50" y="88" font-size="9.5" font-weight="900" text-anchor="middle" fill="currentColor">INHA 1954</text></svg>`,
+    '아주대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><polygon points="50,22 72,74 60,74 50,50 40,74 28,74" stroke="currentColor" stroke-width="3.5" fill="none"/><circle cx="50" cy="34" r="5"/><text x="50" y="88" font-size="9.5" font-weight="900" text-anchor="middle" fill="currentColor">AJOU</text></svg>`,
+    '서울과기대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><polygon points="50,26 74,38 74,64 50,76 26,64 26,38" stroke="currentColor" stroke-width="3.5" fill="none"/><line x1="50" y1="26" x2="50" y2="76" stroke="currentColor" stroke-width="3"/><line x1="26" y1="38" x2="74" y2="64" stroke="currentColor" stroke-width="2.5"/><text x="50" y="90" font-size="7.5" font-weight="900" text-anchor="middle" fill="currentColor">SEOULTECH</text></svg>`,
+    '가천대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><path d="M50 50 C46 36 30 36 32 48 C36 56 46 50 50 50 Z" fill="currentColor"/><path d="M50 50 C64 46 64 30 52 32 C44 36 50 46 50 50 Z" fill="currentColor"/><path d="M50 50 C54 64 70 64 68 52 C64 44 54 50 50 50 Z" fill="currentColor"/><path d="M50 50 C36 54 36 70 48 68 C56 64 50 54 50 50 Z" fill="currentColor"/><text x="50" y="86" font-size="9" font-weight="900" text-anchor="middle" fill="currentColor">GACHON</text></svg>`,
+    '경기대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><polygon points="50,24 72,36 72,62 50,74 28,62 28,36" stroke="currentColor" stroke-width="3.5" fill="none"/><text x="50" y="55" font-size="14" font-weight="900" text-anchor="middle" fill="currentColor">京</text><text x="50" y="88" font-size="8.5" font-weight="900" text-anchor="middle" fill="currentColor">KYONGGI</text></svg>`,
+    '성신여대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><polygon points="50,20 54,42 76,46 56,54 52,76 44,56 22,50 42,44" stroke="currentColor" stroke-width="3" fill="none"/><text x="50" y="88" font-size="8.5" font-weight="900" text-anchor="middle" fill="currentColor">SUNGSHIN</text></svg>`,
+    'default': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><polygon points="50,22 82,40 50,56 18,40" stroke="currentColor" stroke-width="3.5" fill="none"/><path d="M30 46 V66 C30 76, 70 76, 70 66 V46" stroke="currentColor" stroke-width="3.5" fill="none"/><circle cx="50" cy="50" r="6" fill="currentColor"/></svg>`
+  },
+  defaultCriteria: {
+    qualification: {
+      title: '지원 자격·학점',
+      items: [
+        { label: '지원 선발 구분', text: '국내 4년제 대학 2학년(4학기) 이상 수료(예정)자' },
+        { label: '이수 학점 기준', text: '통상 65~70학점 이상 취득 권장 (전적대학 성적 평점 2.0 이상)' }
+      ]
+    },
+    exam: {
+      title: '시험 과목·범위',
+      items: [
+        { label: '자연계열 필기', text: '편입수학(미적분학, 선형대수) 및 전공 기초 + 편입영어' },
+        { label: '인문계열 필기', text: '편입영어(독해·논리·문법·어휘) 100% 필답고사' }
+      ]
+    },
+    language: {
+      title: '어학·자격증',
+      items: [
+        { label: '공인어학 기준', text: '자체 필답고사 실시 (공인영어 제출 요건은 학과별 요강 참조)' },
+        { label: '가산점 기준', text: '국가공인 기사 자격증 및 공모전 입상 실적 학업계획서 반영' }
+      ]
+    },
+    schedule: {
+      title: '제출 서류·일정',
+      items: [
+        { label: '원서 접수 기간', text: '12월 중순 예정 (진학사/유웨이 및 입학처 온라인 접수)' },
+        { label: '필기 시험일', text: '1월 중 주말 실시 (대학별 고사 일정 중복 확인 필요)' }
+      ]
+    }
+  },
+  specialCriteria: {
+    '서울대': {
+      qualification: {
+        title: '지원 자격·학점',
+        items: [
+          { label: '지원 선발 구분', text: '학사편입학 단독 선발 (※ 일반편입학은 미선발)' },
+          { label: '학위 요건', text: '국내·외 정규 대학 학사학위 취득(예정)자' },
+          { label: '성적 환산 기준', text: '전적대학 전 학년 성적 평점 3.3/4.3 이상 권장' }
+        ]
+      },
+      exam: {
+        title: '시험 과목·범위',
+        items: [
+          { label: '1단계 서류 전형', text: '서류평가 100% 또는 학과별 전공 필답시험 평가' },
+          { label: '2단계 심층 면접', text: '전공 구술고사 및 학업계획 심층 질의' }
+        ]
+      },
+      language: {
+        title: '어학·자격증',
+        items: [
+          { label: '공인영어 기준', text: 'TEPS 정기시험 성적표 필수 제출 (학과별 최저 기준 충족)' },
+          { label: '토플(TOEFL)', text: '일부 계열에 한해 토플 IBT 성적 인정' }
+        ]
+      },
+      schedule: {
+        title: '제출 서류·일정',
+        items: [
+          { label: '원서 접수 기간', text: '12월 초순 서울대 입학처 온라인 접수' },
+          { label: '전공 구술 면접', text: '12월 말~1월 초 학과별 세부 진행' }
+        ]
+      }
+    }
+  }
 };
 
-// JSON 파일 비동기 로드 함수
-async function fetchUniversityData() {
-  try {
-    const response = await fetch('./data/universities.json');
-    if (response.ok) {
-      UNIV_DATA = await response.json();
-    }
-  } catch (err) {
-    console.warn('로컬 파일 실행이거나 JSON 로드 실패 시 내장 폴백 데이터를 활용합니다.', err);
-  } finally {
-    renderScreen();
-  }
-}
-
-// 대학별 전형 데이터 생성기 (JSON 데이터와 연동)
+// 대학별 전형 데이터 생성기
 function getAdmissionCriteria(uni, unit, year, type) {
   if (UNIV_DATA.specialCriteria && UNIV_DATA.specialCriteria[uni]) {
     const spec = UNIV_DATA.specialCriteria[uni];
@@ -47,7 +149,6 @@ function getAdmissionCriteria(uni, unit, year, type) {
     ? '자연계열: 편입수학(미적분·선형대수) + 편입영어 필답고사' 
     : '인문계열: 편입영어(독해·논리·어휘) 100% 필답고사';
 
-  const defaultCrit = UNIV_DATA.defaultCriteria || {};
   return {
     qualification: {
       title: '지원 자격·학점',
@@ -90,7 +191,7 @@ function getEmblemSvg(uniName) {
 
 // 기본 앱 상태
 const defaultState = {
-  user: null, // { isLoggedIn: false, name: '', id: '', agreedTerms: false }
+  user: null,
   activeTargetIndex: 0,
   targets: [
     {
@@ -319,7 +420,7 @@ function renderHome() {
 
   <div class="section-title-row">
     <div style="display:flex;align-items:center;gap:8px">
-      <div style="width:28px;height:28px;border-radius:50%;background:var(--soft);display:grid;place-items:center;color:var(--primary);padding:3px">
+      <div class="mini-emblem-badge">
         ${target ? getEmblemSvg(target.university) : getEmblemSvg('default')}
       </div>
       <h3 style="margin:0">현재 선택: ${target ? escapeHtml(target.university) : '미선택'}</h3>
@@ -383,7 +484,7 @@ function renderHome() {
             ${appState.activeTargetIndex === idx ? '✓ 현재 선택됨' : '이 대학 선택'}
           </button>
           <button class="btn small secondary" onclick="jumpToChecklist(${idx})">체크리스트</button>
-          <button class="btn small danger" style="flex:0.35" onclick="deleteTargetItem(${idx})">삭제</button>
+          <button class="btn small danger btn-del-compact" onclick="deleteTargetItem(${idx})">삭제</button>
         </div>
       </div>
     `).join('')}
@@ -890,7 +991,7 @@ function renderProfile() {
   <button class="btn ghost danger" style="margin-top:16px" onclick="resetAllAppData()">설정 초기화 (전체 데이터 삭제)</button>
 
   <div class="tip-box" style="margin-top:16px">
-    💡 <strong>프로토타입 v2.3:</strong> data/universities.json 연동, 오버플로우 계정 연동, 개인정보 처리약관, 26개교 전용 엠블럼, 입학처 직통 링크가 모두 탑재되었습니다.
+    💡 <strong>프로토타입 v2.4:</strong> data/universities.json 연동, 오버플로우 계정 연동, 개인정보 처리약관, 26개교 전용 엠블럼, 입학처 직통 링크가 모두 탑재되었습니다.
   </div>
 
   <!-- 설정 화면 하단 개인정보 처리약관 안내 -->
@@ -945,5 +1046,18 @@ document.querySelectorAll('.nav-tab-btn').forEach(btn => {
   btn.addEventListener('click', () => navigateTo(btn.dataset.page));
 });
 
-// JSON 데이터 로드 후 초기 화면 렌더링
+// data/universities.json 비동기 로드 및 초기 렌더링
+async function fetchUniversityData() {
+  try {
+    const response = await fetch('./data/universities.json');
+    if (response.ok) {
+      UNIV_DATA = await response.json();
+    }
+  } catch (err) {
+    console.warn('로컬 환경 실행: 내장 대학 데이터를 사용합니다.');
+  } finally {
+    renderScreen();
+  }
+}
+
 fetchUniversityData();
