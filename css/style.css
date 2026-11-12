@@ -53,6 +53,13 @@ html, body {
 button, input, select { font: inherit; }
 button { cursor: pointer; border: none; background: none; }
 
+/* 모든 인라인 SVG가 부모 컨테이너 크기를 넘쳐 글자와 겹치는 현상 방지 */
+svg {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
+
 .app-wrapper {
   width: 100%;
   max-width: 430px;
@@ -74,6 +81,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   position: sticky;
   top: 0;
   z-index: 30;
@@ -87,11 +95,13 @@ header {
   gap: 8px;
   color: var(--ink-900);
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
 .brand-icon {
   width: 26px;
   height: 26px;
+  min-width: 26px;
   border-radius: 8px;
   background: linear-gradient(135deg, #1e293b, #0f172a);
   color: #fff;
@@ -106,6 +116,7 @@ header {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 .btn-login-header {
   font-size: 11.5px;
@@ -114,6 +125,7 @@ header {
   border-radius: 20px;
   background: var(--primary);
   color: white;
+  white-space: nowrap;
   transition: all .15s ease;
   box-shadow: 0 2px 6px var(--primary-glow);
 }
@@ -131,6 +143,7 @@ header {
   font-weight: 700;
   color: var(--ink-700);
   cursor: pointer;
+  white-space: nowrap;
 }
 .user-profile-chip:active { background: #e2e8f0; }
 .user-dot {
@@ -138,11 +151,13 @@ header {
   height: 7px;
   border-radius: 50%;
   background: var(--success);
+  flex-shrink: 0;
 }
 
 main {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 20px 18px 40px;
   -webkit-overflow-scrolling: touch;
 }
@@ -185,7 +200,14 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   box-shadow: var(--shadow-sm);
 }
 .btn.ghost { background: var(--soft); color: var(--ink-700); }
-.btn.small { width: auto; min-height: 34px; padding: 6px 12px; font-size: 12px; border-radius: var(--radius-sm); }
+.btn.small {
+  width: auto;
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
 .btn.danger { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecaca; }
 
 .banner-action {
@@ -216,11 +238,13 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: 13px;
   box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-width: 0;
+  overflow: hidden;
 }
 .stat-box strong { font-size: 22px; font-weight: 800; color: var(--primary); letter-spacing: -0.02em; }
 .stat-box span.lbl { font-size: 11px; color: var(--ink-500); font-weight: 600; margin-bottom: 4px; display: block; }
@@ -230,13 +254,20 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 8px;
+  gap: 4px;
+  padding: 5px 7px;
   background: var(--soft);
   border: 1px solid transparent;
   border-radius: 6px;
-  font-size: 11.5px;
+  font-size: 11px;
   cursor: pointer;
   transition: all .15s;
+  min-width: 0;
+}
+.rank-pill-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .rank-pill-item.active {
   background: var(--primary-light);
@@ -244,7 +275,7 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   color: var(--primary);
   font-weight: 700;
 }
-.rank-pill-item small { color: var(--ink-500); font-size: 10px; }
+.rank-pill-item small { color: var(--ink-500); font-size: 10px; flex-shrink: 0; }
 
 .progress-track {
   width: 100%;
@@ -265,10 +296,32 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   margin: 20px 0 10px;
 }
 .section-title-row h3 { font-size: 15px; font-weight: 700; color: var(--ink-900); }
-.section-tag { font-size: 11px; color: var(--ink-400); font-weight: 700; letter-spacing: 0.05em; }
+.section-tag { font-size: 11px; color: var(--ink-400); font-weight: 700; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0; }
+
+/* 현재 선택 대학 미니 엠블럼 뱃지 */
+.mini-emblem-badge {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  padding: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.mini-emblem-badge svg {
+  width: 100%;
+  height: 100%;
+}
 
 .tile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .quick-tile {
@@ -283,11 +336,12 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   flex-direction: column;
   justify-content: space-between;
   min-height: 94px;
+  min-width: 0;
 }
 .quick-tile:active { transform: translateY(1px); border-color: var(--primary); }
-.quick-tile .title { font-size: 13.5px; font-weight: 700; color: var(--ink-900); }
-.quick-tile .desc { font-size: 11.5px; color: var(--ink-500); }
-.quick-tile .arrow { font-size: 12px; color: var(--primary); font-weight: 700; text-align: right; }
+.quick-tile .title { font-size: 13.5px; font-weight: 700; color: var(--ink-900); margin-bottom: 2px; }
+.quick-tile .desc { font-size: 11.5px; color: var(--ink-500); line-height: 1.35; }
+.quick-tile .arrow { font-size: 12px; color: var(--primary); font-weight: 700; text-align: right; margin-top: 6px; }
 
 /* 대학 카드 및 드래그 앤 드롭 */
 .target-card {
@@ -324,6 +378,7 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   font-weight: 800;
   padding: 3px 8px;
   border-radius: 6px;
+  white-space: nowrap;
 }
 .priority-tag.p1 { background: #fef3c7; color: #b45309; }
 .priority-tag.p2 { background: #e0e7ff; color: #4338ca; }
@@ -347,8 +402,10 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   gap: 6px;
   margin-top: 12px;
 }
-.card-actions > * { flex: 1; }
+.card-actions > * { flex: 1; min-width: 0; }
+.card-actions .btn-del-compact { flex: 0 0 auto; min-width: 52px; }
 
+/* 대학 전환 가로 스크롤 탭 */
 .tab-scroll-wrap {
   display: flex;
   gap: 6px;
@@ -367,6 +424,7 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   font-size: 12.5px;
   font-weight: 600;
   white-space: nowrap;
+  flex-shrink: 0;
   transition: all .15s;
 }
 .pill-tab.active {
@@ -376,6 +434,7 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   box-shadow: var(--shadow-sm);
 }
 
+/* 폼 컨트롤 */
 label { display: block; font-size: 13px; font-weight: 700; color: var(--ink-700); margin: 14px 0 6px; }
 select, input[type=text], input[type=password], input[type=email] {
   width: 100%;
@@ -387,6 +446,12 @@ select, input[type=text], input[type=password], input[type=email] {
   min-height: 46px;
   font-size: 14px;
   transition: border-color .15s;
+}
+input[type=file] {
+  width: 100%;
+  max-width: 100%;
+  font-size: 12.5px;
+  color: var(--ink-700);
 }
 select:focus, input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
   outline: none;
@@ -407,6 +472,7 @@ select:focus, input[type=text]:focus, input[type=password]:focus, input[type=ema
 }
 .notice-banner.show { display: block; }
 
+/* 안내 박스 및 리스트 */
 .guide-card {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -414,6 +480,7 @@ select:focus, input[type=text]:focus, input[type=password]:focus, input[type=ema
   padding: 16px;
   margin: 12px 0;
   box-shadow: var(--shadow-card);
+  overflow-wrap: anywhere;
 }
 .guide-item {
   padding-bottom: 12px;
@@ -447,12 +514,14 @@ select:focus, input[type=text]:focus, input[type=password]:focus, input[type=ema
 .check-item input[type=checkbox] {
   width: 19px;
   height: 19px;
+  min-width: 19px;
   accent-color: var(--primary);
   margin-top: 2px;
   cursor: pointer;
 }
 .check-item small { display: block; font-size: 11.5px; color: var(--ink-500); margin-top: 3px; }
 
+/* 엠블럼 워터마크 카드 (설정 탭) */
 .emblem-showcase-card {
   position: relative;
   overflow: hidden;
@@ -465,19 +534,24 @@ select:focus, input[type=text]:focus, input[type=password]:focus, input[type=ema
 }
 .emblem-watermark {
   position: absolute;
-  right: -20px;
-  bottom: -25px;
-  width: 160px;
-  height: 160px;
+  right: -16px;
+  bottom: -20px;
+  width: 150px;
+  height: 150px;
   opacity: 0.085;
   pointer-events: none;
   z-index: 1;
+}
+.emblem-watermark svg {
+  width: 100%;
+  height: 100%;
 }
 .emblem-content {
   position: relative;
   z-index: 2;
 }
 
+/* AI 시뮬레이션 모달 */
 .ai-modal-overlay {
   position: absolute;
   inset: 0;
@@ -566,6 +640,7 @@ select:focus, input[type=text]:focus, input[type=password]:focus, input[type=ema
 .login-agree-label input[type="checkbox"] {
   width: 17px;
   height: 17px;
+  min-width: 17px;
   accent-color: var(--primary);
   cursor: pointer;
   margin: 0;
