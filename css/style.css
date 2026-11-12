@@ -228,17 +228,19 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
+/* 진행률 및 대학 우선순위 창 가로 전체(1열) 확장 */
 .stats-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
   margin: 14px 0 18px;
 }
 .stat-box {
+  width: 100%;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  padding: 13px;
+  padding: 14px 16px;
   box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
@@ -246,20 +248,33 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   min-width: 0;
   overflow: hidden;
 }
+.stat-box > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
 .stat-box strong { font-size: 22px; font-weight: 800; color: var(--primary); letter-spacing: -0.02em; }
-.stat-box span.lbl { font-size: 11px; color: var(--ink-500); font-weight: 600; margin-bottom: 4px; display: block; }
+.stat-box span.lbl { font-size: 12px; color: var(--ink-500); font-weight: 700; margin-bottom: 6px; display: block; }
 
-.rank-pills { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
+.rank-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  width: 100%;
+}
 .rank-pill-item {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 4px;
-  padding: 5px 7px;
+  gap: 8px;
+  padding: 8px 12px;
   background: var(--soft);
   border: 1px solid transparent;
-  border-radius: 6px;
-  font-size: 11px;
+  border-radius: 8px;
+  font-size: 12.5px;
   cursor: pointer;
   transition: all .15s;
   min-width: 0;
@@ -275,7 +290,7 @@ h3 { font-size: 15px; margin-bottom: 4px; font-weight: 700; }
   color: var(--primary);
   font-weight: 700;
 }
-.rank-pill-item small { color: var(--ink-500); font-size: 10px; flex-shrink: 0; }
+.rank-pill-item small { color: var(--ink-500); font-size: 11.5px; font-weight: 700; flex-shrink: 0; }
 
 .progress-track {
   width: 100%;
