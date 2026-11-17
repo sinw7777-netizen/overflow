@@ -1,7 +1,119 @@
-const STORAGE_KEY = 'transfer_prep_prototype_v1';
+const SESSION_KEY = 'transfer_prep_active_session_v2';
+const USER_STORAGE_PREFIX = 'transfer_prep_user_';
+const UNIFIED_PW = '12345678';
 
-// 기본 내장 대학 데이터베이스 (로컬 실행 폴백용) + data/universities.json 비동기 연동
+// 기본 내장 데이터베이스 (로컬 실행 폴백용) + data/universities.json 비동기 로드 시 덮어쓰기됨
 let UNIV_DATA = {
+  accounts: {
+    'overflow7777': {
+      id: 'overflow7777',
+      aliases: ['overflow7777', 'overflow', '오버플로우'],
+      pw: '12345678',
+      name: '오버플로우 님',
+      label: '1. 오버플로우 (인하·성균관·한양)',
+      initialTargets: [
+        {
+          id: 101,
+          university: '인하대',
+          year: '2027',
+          type: '일반편입',
+          unit: '컴퓨터공학과',
+          checks: [true, false, false, false],
+          notes: { 0: '전적대 68학점 이수 확인 완료' }
+        },
+        {
+          id: 102,
+          university: '성균관대',
+          year: '2027',
+          type: '일반편입',
+          unit: '소프트웨어학과',
+          checks: [false, false, false, false],
+          notes: {}
+        },
+        {
+          id: 103,
+          university: '한양대',
+          year: '2027',
+          type: '일반편입',
+          unit: '컴퓨터소프트웨어학부',
+          checks: [true, true, false, false],
+          notes: {}
+        }
+      ]
+    },
+    'hong7777': {
+      id: 'hong7777',
+      aliases: ['hong7777', 'hong', '홍길동'],
+      pw: '12345678',
+      name: '홍길동 님',
+      label: '2. 홍길동 (연세·고려·중앙)',
+      initialTargets: [
+        {
+          id: 201,
+          university: '연세대(신촌)',
+          year: '2027',
+          type: '일반편입',
+          unit: '경영학과',
+          checks: [true, true, true, false],
+          notes: { 0: '2학년 수료 학점 충족, 편입논술 기출 분석 중' }
+        },
+        {
+          id: 202,
+          university: '고려대(서울)',
+          year: '2027',
+          type: '일반편입',
+          unit: '경제학과',
+          checks: [true, false, false, false],
+          notes: {}
+        },
+        {
+          id: 203,
+          university: '중앙대',
+          year: '2027',
+          type: '일반편입',
+          unit: '미디어커뮤니케이션학부',
+          checks: [true, true, false, false],
+          notes: {}
+        }
+      ]
+    },
+    'transfer7777': {
+      id: 'transfer7777',
+      aliases: ['transfer7777', 'transfer', '편입생'],
+      pw: '12345678',
+      name: '편입생 님',
+      label: '3. 편입생 (서울·서강·경희)',
+      initialTargets: [
+        {
+          id: 301,
+          university: '서울대',
+          year: '2027',
+          type: '학사편입',
+          unit: '컴퓨터공학부',
+          checks: [true, true, true, true],
+          notes: { 0: '학사학위 취득 예정 및 TEPS 정기시험 성적표 확보 완료' }
+        },
+        {
+          id: 302,
+          university: '서강대',
+          year: '2027',
+          type: '학사편입',
+          unit: '인공지능학과',
+          checks: [true, false, true, false],
+          notes: {}
+        },
+        {
+          id: 303,
+          university: '경희대',
+          year: '2027',
+          type: '일반편입',
+          unit: '소프트웨어융합학과',
+          checks: [false, false, false, false],
+          notes: {}
+        }
+      ]
+    }
+  },
   universityList: [
     '서울대', '연세대(신촌)', '고려대(서울)', '서강대', '성균관대', '한양대',
     '중앙대', '이화여대', '경희대', '한국외대', '서울시립대', '건국대',
@@ -101,6 +213,11 @@ let UNIV_DATA = {
   }
 };
 
+// JSON 내 accounts 객체 참조 헬퍼
+function getAccountsMap() {
+  return (UNIV_DATA && UNIV_DATA.accounts) ? UNIV_DATA.accounts : {};
+}
+
 function getAdmissionCriteria(uni, unit, year, type) {
   if (UNIV_DATA.specialCriteria && UNIV_DATA.specialCriteria[uni]) {
     const spec = UNIV_DATA.specialCriteria[uni];
@@ -158,47 +275,83 @@ function getEmblemSvg(uniName) {
   return UNIV_DATA.emblems ? UNIV_DATA.emblems['default'] : '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="currentColor" fill="none"/></svg>';
 }
 
-const defaultState = {
-  user: null,
-  activeTargetIndex: 0, // null 이면 아무 대학도 미선택 상태
-  targets: [
-    {
-      id: 1,
-      university: '인하대',
-      year: '2027',
-      type: '일반편입',
-      unit: '컴퓨터공학과',
-      checks: [true, false, false, false],
-      notes: { 0: '전적대 68학점 이수 확인 완료' }
-    },
-    {
-      id: 2,
-      university: '성균관대',
-      year: '2027',
-      type: '일반편입',
-      unit: '소프트웨어학과',
-      checks: [false, false, false, false],
-      notes: {}
-    },
-    {
-      id: 3,
-      university: '한양대',
-      year: '2027',
-      type: '일반편입',
-      unit: '컴퓨터소프트웨어학부',
-      checks: [true, true, false, false],
-      notes: {}
+function cloneInitialTargets(accountId) {
+  const accounts = getAccountsMap();
+  const preset = accounts[accountId] || accounts['overflow7777'];
+  return preset && preset.initialTargets ? JSON.parse(JSON.stringify(preset.initialTargets)) : [];
+}
+
+function findPresetAccount(inputId) {
+  const normalized = String(inputId || '').trim().toLowerCase();
+  const accounts = getAccountsMap();
+  for (const key of Object.keys(accounts)) {
+    const acc = accounts[key];
+    const aliases = Array.isArray(acc.aliases) ? acc.aliases : [acc.id];
+    if (acc.id.toLowerCase() === normalized || aliases.some(alias => String(alias).toLowerCase() === normalized)) {
+      return acc;
     }
-  ]
+  }
+  return null;
+}
+
+// JSON에 정의된 계정 정보와 localStorage를 결합하여 계정별 상태 로드
+function loadUserAccountState(accountId) {
+  const accounts = getAccountsMap();
+  const acc = accounts[accountId];
+  if (!acc) return null;
+  try {
+    const raw = localStorage.getItem(USER_STORAGE_PREFIX + acc.id);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        user: { isLoggedIn: true, name: acc.name, id: acc.id, agreedTerms: true },
+        activeTargetIndex: parsed.activeTargetIndex !== undefined ? parsed.activeTargetIndex : 0,
+        targets: Array.isArray(parsed.targets) && parsed.targets.length > 0 ? parsed.targets : cloneInitialTargets(acc.id)
+      };
+    }
+  } catch (e) {
+    console.warn('계정 데이터 파싱 오류, JSON 초기 데이터를 로드합니다.');
+  }
+  return {
+    user: { isLoggedIn: true, name: acc.name, id: acc.id, agreedTerms: true },
+    activeTargetIndex: 0,
+    targets: cloneInitialTargets(acc.id)
+  };
+}
+
+let appState = {
+  user: null,
+  activeTargetIndex: 0,
+  targets: []
 };
 
-let appState;
-try {
-  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-  appState = { ...defaultState, ...saved };
-  if (!appState.targets || appState.targets.length === 0) appState.targets = [...defaultState.targets];
-} catch (e) {
-  appState = { ...defaultState };
+function restoreSessionAfterJsonLoad() {
+  try {
+    const savedSession = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
+    const accounts = getAccountsMap();
+    if (savedSession.currentUserId && accounts[savedSession.currentUserId]) {
+      appState = loadUserAccountState(savedSession.currentUserId);
+      return;
+    }
+  } catch (e) {
+    console.warn('세션 복원 실패');
+  }
+  appState = { user: null, activeTargetIndex: 0, targets: cloneInitialTargets('overflow7777') };
+}
+
+// 로그인 모달 내 프리셋 계정 버튼을 JSON의 accounts 목록 기준으로 동적 갱신
+function renderPresetAccountButtons() {
+  const listEl = document.getElementById('presetAccountBtnList');
+  if (!listEl) return;
+  const accounts = getAccountsMap();
+  const keys = Object.keys(accounts);
+  if (!keys.length) return;
+
+  listEl.innerHTML = keys.map((key, idx) => {
+    const acc = accounts[key];
+    const labelText = acc.label || `${idx + 1}. ${acc.name} (${acc.id})`;
+    return `<button type="button" class="btn secondary small" onclick="quickDemoLogin('${escapeHtml(acc.id)}')">${escapeHtml(labelText)}</button>`;
+  }).join('');
 }
 
 let currentPage = 'home';
@@ -210,7 +363,15 @@ function isLoggedIn() {
 }
 
 function persist() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+  if (isLoggedIn() && appState.user.id) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ currentUserId: appState.user.id }));
+    localStorage.setItem(USER_STORAGE_PREFIX + appState.user.id, JSON.stringify({
+      activeTargetIndex: appState.activeTargetIndex,
+      targets: appState.targets
+    }));
+  } else {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ currentUserId: null }));
+  }
 }
 
 function showToast(msg = '저장되었습니다.') {
@@ -258,7 +419,7 @@ function handleBackAction() {
 }
 
 /* =========================================================
-   로그인/인증 인터랙션 함수
+   로그인/인증 인터랙션 함수 (JSON accounts 데이터 기반)
    ========================================================= */
 function renderHeaderAuth() {
   const container = document.getElementById('headerAuthArea');
@@ -266,7 +427,7 @@ function renderHeaderAuth() {
 
   if (isLoggedIn()) {
     container.innerHTML = `
-      <div class="user-profile-chip" onclick="handleUserLogoutPrompt()" title="클릭하여 로그아웃">
+      <div class="user-profile-chip" onclick="handleUserLogoutPrompt()" title="클릭하여 로그아웃 또는 계정 전환">
         <span class="user-dot"></span>
         <span>${escapeHtml(appState.user.name)}</span>
       </div>
@@ -279,6 +440,7 @@ function renderHeaderAuth() {
 }
 
 function openLoginModal() {
+  renderPresetAccountButtons();
   document.getElementById('loginOverlay').classList.add('show');
 }
 
@@ -287,8 +449,8 @@ function closeLoginModal() {
 }
 
 function executeLogin() {
-  const id = document.getElementById('loginId').value.trim();
-  const pw = document.getElementById('loginPw').value.trim();
+  const idInput = document.getElementById('loginId').value.trim();
+  const pwInput = document.getElementById('loginPw').value.trim();
   const agree = document.getElementById('loginAgree').checked;
 
   if (!agree) {
@@ -296,31 +458,45 @@ function executeLogin() {
     return;
   }
 
-  if (!id || !pw) {
+  if (!idInput || !pwInput) {
     showToast('아이디와 비밀번호를 모두 입력해 주세요.');
     return;
   }
 
-  let nickname = id === 'overflow7777' ? '오버플로우 님' : id + ' 님';
-  appState.user = { isLoggedIn: true, name: nickname, id: id, agreedTerms: true };
-  if (appState.activeTargetIndex === undefined) appState.activeTargetIndex = 0;
+  const matchedAccount = findPresetAccount(idInput);
+  if (!matchedAccount || pwInput !== matchedAccount.pw) {
+    showToast('등록된 계정 아이디 또는 비밀번호(12345678)를 확인해 주세요.');
+    return;
+  }
+
+  appState = loadUserAccountState(matchedAccount.id);
   persist();
   closeLoginModal();
   renderScreen();
-  showToast(`${nickname} 환영합니다!`);
+  showToast(`${matchedAccount.name} 계정으로 로그인되었습니다!`);
 }
 
-function quickDemoLogin() {
-  appState.user = { isLoggedIn: true, name: '오버플로우 님', id: 'overflow7777', agreedTerms: true };
-  if (appState.activeTargetIndex === undefined) appState.activeTargetIndex = 0;
+function quickDemoLogin(targetId = 'overflow7777') {
+  const agreeEl = document.getElementById('loginAgree');
+  if (agreeEl && !agreeEl.checked) {
+    agreeEl.checked = true;
+  }
+  const accounts = getAccountsMap();
+  const matchedAccount = findPresetAccount(targetId) || accounts['overflow7777'];
+  if (!matchedAccount) return;
+
+  document.getElementById('loginId').value = matchedAccount.id;
+  document.getElementById('loginPw').value = matchedAccount.pw || UNIFIED_PW;
+
+  appState = loadUserAccountState(matchedAccount.id);
   persist();
   closeLoginModal();
   renderScreen();
-  showToast('오버플로우 계정으로 로그인되었습니다.');
+  showToast(`${matchedAccount.name} 계정 데이터를 불러왔습니다.`);
 }
 
 function handleUserLogoutPrompt() {
-  if (confirm(`현재 '${appState.user.name}' 계정으로 로그인되어 있습니다.\n로그아웃하시겠습니까?`)) {
+  if (confirm(`현재 '${appState.user.name}' (${appState.user.id}) 계정으로 로그인되어 있습니다.\n로그아웃하시겠습니까?`)) {
     appState.user = null;
     persist();
     renderScreen();
@@ -361,7 +537,6 @@ function renderScreen() {
    1. 홈 화면 (Home)
    ========================================================= */
 function renderHome() {
-  // 비로그인 시 목표 대학/우선순위/퀵메뉴 숨김 처리
   if (!isLoggedIn()) {
     return `
     <div class="eyebrow">DASHBOARD · TRANSFER ASSISTANT</div>
@@ -370,7 +545,7 @@ function renderHome() {
     
     <div class="banner-action">
       <h2>맞춤형 편입 준비 시작하기</h2>
-      <p>상단 또는 아래 로그인 버튼으로 접속해 26개 주요 대학 모집요강과 나의 준비 현황을 확인하세요.</p>
+      <p>오버플로우·홍길동·편입생 3개 계정 중 하나로 로그인해 계정별 맞춤 모집요강과 준비 현황을 확인하세요.</p>
       <button class="btn" onclick="openLoginModal()">로그인하여 내 대학 불러오기 →</button>
     </div>
 
@@ -386,7 +561,6 @@ function renderHome() {
     </div>
   `).join('');
 
-  // 대학이 선택된 경우에만 퀵메뉴 표시 (같은 대학 재클릭 해제 시 퀵메뉴도 숨김)
   const quickMenuSection = target ? `
     <div class="section-title-row">
       <div style="display:flex;align-items:center;gap:8px">
@@ -486,7 +660,6 @@ function renderHome() {
   </div>`;
 }
 
-// 같은 대학을 다시 클릭하면 선택 해제 (null), 다른 대학 클릭 시 선택
 function selectTargetByRank(idx) {
   if (appState.activeTargetIndex === idx) {
     appState.activeTargetIndex = null;
@@ -740,24 +913,23 @@ function executeAiScan() {
 }
 
 /* =========================================================
-   3. 준비사항 요약 목록 (List)
+   3. 요강안내 요약 목록 (List)
    ========================================================= */
 function renderList() {
   if (!isLoggedIn()) {
-    return `${createTitlebar('편입 준비사항 요약', '', true)}${renderLoginRequiredBox('등록한 목표 대학의 전형 요강과 세부 기준을 열람하려면 로그인해 주세요.')}`;
+    return `${createTitlebar('편입 요강안내', '', true)}${renderLoginRequiredBox('등록한 목표 대학의 전형 요강과 세부 기준을 열람하려면 로그인해 주세요.')}`;
   }
 
   if (!appState.targets.length) {
-    return `${createTitlebar('편입 준비사항 요약', '2 / 4', true)}<div class="guide-card"><p>등록된 목표 대학이 없습니다.</p><button class="btn" style="margin-top:12px" onclick="navigateTo('search')">+ 목표 대학 추가</button></div>`;
+    return `${createTitlebar('편입 요강안내', '2 / 4', true)}<div class="guide-card"><p>등록된 목표 대학이 없습니다.</p><button class="btn" style="margin-top:12px" onclick="navigateTo('search')">+ 목표 대학 추가</button></div>`;
   }
 
-  // 준비사항 탭 진입 시 선택된 대학이 없으면 첫 번째 대학을 기준으로 표시하되 탭 선택 가능
   const target = getCurrentTarget() || appState.targets[0];
   const activeIdx = getCurrentTarget() ? appState.activeTargetIndex : 0;
   const data = getAdmissionCriteria(target.university, target.unit, target.year, target.type);
 
   return `
-  ${createTitlebar('편입 준비사항 요약', '2 / 4', true)}
+  ${createTitlebar('편입 요강안내', '2 / 4', true)}
   <div class="progress-track" style="margin-bottom:14px"><div class="progress-fill" style="width:50%"></div></div>
 
   <div class="tab-scroll-wrap">
@@ -867,7 +1039,7 @@ function renderDetail() {
   <input type="text" id="memoBox" placeholder="예: 전적대 68학점 충족 완료 / 서류 발급 신청" value="${escapeHtml(userNote)}">
   
   <div class="card-actions" style="margin-top:14px">
-    <button class="btn secondary" onclick="navigateTo('list')">목록으로</button>
+    <button class="btn secondary" onclick="navigateTo('list')">요강안내 목록</button>
     <button class="btn" onclick="saveActiveCategoryMemo(${currentIdx})">메모 저장</button>
   </div>
 
@@ -948,11 +1120,11 @@ function renderCheck() {
   `).join('')}
 
   <div class="tip-box">
-    💡 체크리스트 상태는 대학별로 독립 보관됩니다. 상단 탭을 전환하여 대학별 준비 상태를 점검해 보세요.
+    💡 체크리스트 상태는 계정 및 대학별로 독립 보관됩니다. 상단 탭을 전환하여 대학별 준비 상태를 점검해 보세요.
   </div>
 
   <div class="card-actions" style="margin-top:16px">
-    <button class="btn secondary" onclick="navigateTo('list')">준비사항 보기</button>
+    <button class="btn secondary" onclick="navigateTo('list')">요강안내 보기</button>
     <button class="btn" onclick="navigateTo('home')">홈으로</button>
   </div>
   <button class="btn ghost" style="margin-top:8px" onclick="resetChecklistForTarget(${targetIdx})">이 대학 체크 초기화</button>`;
@@ -1000,7 +1172,7 @@ function renderProfile() {
       <div class="emblem-content">
         <span class="priority-tag p3" style="display:inline-block;margin-bottom:8px">🔒 비로그인 상태</span>
         <h2 style="font-size:20px;margin:2px 0 6px;color:var(--ink-900)">대표 목표 대학 미표시</h2>
-        <p style="font-size:13px;color:var(--ink-500)">로그인하시면 1순위 대표 목표 대학교와 맞춤 엠블럼이 표시됩니다.</p>
+        <p style="font-size:13px;color:var(--ink-500)">로그인하시면 계정별 1순위 대표 목표 대학교와 맞춤 엠블럼이 표시됩니다.</p>
       </div>
     </div>
   `;
@@ -1008,36 +1180,36 @@ function renderProfile() {
   return `
   ${createTitlebar('설정 및 계정 관리', '', false)}
   <h1 style="font-size:21px">내 정보와 저장 데이터</h1>
-  <p class="sub">등록한 목표 대학과 개인 메모는 기기 브라우저 및 계정에 보관됩니다.</p>
+  <p class="sub">등록한 목표 대학과 개인 메모는 로그인한 계정별로 독립 보관됩니다.</p>
   
   ${topShowcaseHtml}
 
-  <div class="section-title-row" style="margin-top:24px"><h3>계정 상태</h3></div>
+  <div class="section-title-row" style="margin-top:24px"><h3>계정 상태 및 전환</h3></div>
   <div class="guide-card" style="margin:0 0 14px">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
         <b style="font-size:14px;color:var(--ink-900)">${loggedIn ? escapeHtml(appState.user.name) : '비로그인 사용자'}</b>
-        <p style="font-size:12px;color:var(--ink-500);margin-top:2px">${loggedIn ? `계정 ID: ${escapeHtml(appState.user.id)} (동기화 완료)` : '로그인하고 목표 데이터를 계정에 보관하세요.'}</p>
+        <p style="font-size:12px;color:var(--ink-500);margin-top:2px">${loggedIn ? `계정 ID: ${escapeHtml(appState.user.id)} (JSON 계정 연동됨)` : '로그인하고 계정별 목표 데이터를 불러오세요.'}</p>
       </div>
-      ${loggedIn 
-        ? `<button class="btn small danger" onclick="handleUserLogoutPrompt()">로그아웃</button>`
-        : `<button class="btn small" onclick="openLoginModal()">로그인</button>`
-      }
+      <div style="display:flex;gap:6px">
+        <button class="btn small secondary" onclick="openLoginModal()">계정 전환</button>
+        ${loggedIn ? `<button class="btn small danger" onclick="handleUserLogoutPrompt()">로그아웃</button>` : ''}
+      </div>
     </div>
   </div>
 
   ${loggedIn ? `
     <div class="section-title-row" style="margin-top:20px"><h3>데이터 백업 및 복원</h3></div>
-    <button class="btn secondary" onclick="exportAppData()">내 데이터 백업하기 (JSON)</button>
+    <button class="btn secondary" onclick="exportAppData()">현재 계정 데이터 백업하기 (JSON)</button>
     
     <label for="fileBackup" style="margin-top:14px">백업 파일 불러오기</label>
     <input type="file" id="fileBackup" accept=".json,application/json">
     <button class="btn secondary" style="margin-top:10px" onclick="importAppData()">백업 데이터 복원</button>
-    <button class="btn ghost danger" style="margin-top:16px" onclick="resetAllAppData()">설정 초기화 (전체 데이터 삭제)</button>
+    <button class="btn ghost danger" style="margin-top:16px" onclick="resetAllAppData()">현재 계정 초기화 (JSON 기본 대학으로 복구)</button>
   ` : ''}
 
   <div class="tip-box" style="margin-top:16px">
-    💡 <strong>프로토타입 v2.5:</strong> 비로그인 데이터 보호 모드, 우선순위 전체 카드 & 선택 토글 해제, 오버플로우 전용 계정, 26개교 엠블럼이 모두 적용되었습니다.
+    💡 <strong>프로토타입 v2.6:</strong> data/universities.json 내 3개 계정(오버플로우·홍길동·편입생) 통합 관리, '요강안내' 탭 개편, 비로그인 보호 모드가 모두 적용되었습니다.
   </div>
 
   <!-- 설정 화면 하단 개인정보 처리약관 안내 -->
@@ -1045,22 +1217,24 @@ function renderProfile() {
     <h4>개인정보 처리방침 안내</h4>
     <p>1. <strong>수집 항목</strong>: 목표 대학 설정 내역, 전형별 체크리스트 상태, 사용자 입력 메모, 계정 식별자(아이디)</p>
     <p>2. <strong>이용 목적</strong>: AI 비서 기반 편입 요강 맞춤 추천 및 학습 진도 저장, 다중 목표 대학 우선순위 관리</p>
-    <p>3. <strong>보유 및 이용 기간</strong>: 브라우저 캐시 삭제 또는 설정 메뉴 내 '설정 초기화' 시 즉시 영구 파기</p>
+    <p>3. <strong>보유 및 이용 기간</strong>: 브라우저 캐시 삭제 또는 설정 메뉴 내 '현재 계정 초기화' 시 즉시 영구 파기</p>
     <p style="margin-top:6px;color:var(--ink-400)">본 서비스는 수험생의 학습 보조를 목적으로 하며, 사전 동의 없이 개인정보를 제3자에게 제공하거나 상업적 용도로 활용하지 않습니다.</p>
   </div>`;
 }
 
 function exportAppData() {
+  if (!isLoggedIn()) return;
   const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = '편입준비_프로토타입_백업.json';
+  a.download = `편입준비_백업_${appState.user.id}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
   showToast('백업 파일이 생성되었습니다.');
 }
 
 function importAppData() {
+  if (!isLoggedIn()) return;
   const input = document.getElementById('fileBackup');
   const file = input.files[0];
   if (!file) { showToast('백업 파일을 먼저 선택해주세요.'); return; }
@@ -1068,10 +1242,15 @@ function importAppData() {
   reader.onload = () => {
     try {
       const data = JSON.parse(reader.result);
-      appState = { ...defaultState, ...data };
-      persist();
-      navigateTo('home');
-      showToast('데이터가 성공적으로 복원되었습니다.');
+      if (Array.isArray(data.targets)) {
+        appState.targets = data.targets;
+        appState.activeTargetIndex = data.activeTargetIndex ?? 0;
+        persist();
+        navigateTo('home');
+        showToast('현재 계정에 데이터가 성공적으로 복원되었습니다.');
+      } else {
+        showToast('올바른 백업 파일 형식이 아닙니다.');
+      }
     } catch (e) {
       showToast('올바른 백업 파일 형식이 아닙니다.');
     }
@@ -1080,12 +1259,14 @@ function importAppData() {
 }
 
 function resetAllAppData() {
-  if (confirm('저장된 모든 목표 대학 정보와 체크 상태를 초기화하시겠습니까?')) {
-    const currentUser = appState.user;
-    appState = { ...defaultState, user: currentUser };
+  if (!isLoggedIn()) return;
+  if (confirm(`현재 '${appState.user.name}' 계정의 목표 대학과 체크 상태를 JSON 초기 상태로 되돌리시겠습니까?`)) {
+    const uid = appState.user.id;
+    localStorage.removeItem(USER_STORAGE_PREFIX + uid);
+    appState = loadUserAccountState(uid);
     persist();
     navigateTo('home');
-    showToast('전체 데이터가 초기화되었습니다.');
+    showToast('현재 계정 데이터가 초기 상태로 복구되었습니다.');
   }
 }
 
@@ -1093,7 +1274,7 @@ document.querySelectorAll('.nav-tab-btn').forEach(btn => {
   btn.addEventListener('click', () => navigateTo(btn.dataset.page));
 });
 
-// 앱 최초 실행 시에만 data/universities.json 비동기 로드 후 화면 렌더링
+// 앱 최초 실행 시 data/universities.json(계정 정보 포함)을 비동기 로드한 후 세션 복원 및 화면 렌더링
 async function fetchUniversityData() {
   try {
     const response = await fetch('./data/universities.json');
@@ -1101,8 +1282,10 @@ async function fetchUniversityData() {
       UNIV_DATA = await response.json();
     }
   } catch (err) {
-    console.warn('로컬 환경 실행: 내장 대학 데이터를 사용합니다.');
+    console.warn('로컬 환경 실행: 내장 대학 및 계정 데이터를 사용합니다.');
   } finally {
+    restoreSessionAfterJsonLoad();
+    renderPresetAccountButtons();
     renderScreen();
   }
 }
