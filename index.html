@@ -23,32 +23,40 @@
   <!-- 메인 동적 화면 컨테이너 -->
   <main id="appScreen" aria-live="polite"></main>
 
-  <!-- 하단 탭 내비게이션 (은은한 회색 톤 분리) -->
+  <!-- 하단 탭 내비게이션 ('요강안내' 적용) -->
   <nav class="nav-bottom-bar" aria-label="메인 탭 메뉴">
     <button class="nav-tab-btn active" data-page="home"><span class="nav-icon">⌂</span>홈</button>
-    <button class="nav-tab-btn" data-page="list"><span class="nav-icon">▤</span>준비사항</button>
+    <button class="nav-tab-btn" data-page="list"><span class="nav-icon">▤</span>요강안내</button>
     <button class="nav-tab-btn" data-page="check"><span class="nav-icon">☑</span>체크리스트</button>
     <button class="nav-tab-btn" data-page="profile"><span class="nav-icon">○</span>설정</button>
   </nav>
 
-  <!-- 로그인 전용 모달 -->
+  <!-- 로그인 전용 모달 (data/universities.json의 accounts 데이터 연동) -->
   <div class="login-modal-overlay" id="loginOverlay">
     <div class="login-modal-window">
       <div class="login-modal-header">
-        <h3>수험생 로그인</h3>
+        <h3>수험생 계정 로그인</h3>
         <button class="btn-close-modal" onclick="closeLoginModal()" aria-label="닫기">✕</button>
       </div>
-      <p class="sub" style="margin-bottom:14px">로그인 시 목표 대학과 준비 현황이 계정에 안전하게 동기화됩니다.</p>
+      <p class="sub" style="margin-bottom:12px">JSON에 등록된 계정별로 목표 대학과 체크리스트가 독립 저장됩니다. (통일 비밀번호: <b>12345678</b>)</p>
       <div class="login-fields">
-        <input type="text" id="loginId" placeholder="아이디" value="overflow7777">
-        <input type="password" id="loginPw" placeholder="비밀번호" value="12345678">
+        <input type="text" id="loginId" placeholder="아이디 (overflow7777 / hong7777 / transfer7777)" value="overflow7777">
+        <input type="password" id="loginPw" placeholder="비밀번호 (12345678)" value="12345678">
       </div>
       <label class="login-agree-label">
         <input type="checkbox" id="loginAgree" checked>
         <span>[필수] 개인정보 수집 및 이용에 동의합니다.</span>
       </label>
-      <button class="btn" style="margin-top:10px;margin-bottom:8px" onclick="executeLogin()">로그인하기</button>
-      <button class="btn secondary" style="min-height:42px;font-size:13px" onclick="quickDemoLogin()">⚡ '오버플로우' 계정으로 1초 로그인</button>
+      <button class="btn" style="margin-top:8px;margin-bottom:12px" onclick="executeLogin()">로그인하기</button>
+      
+      <div class="preset-account-box">
+        <span class="preset-title">⚡ 계정별 1초 전환 테스트 (클릭 시 바로 로그인)</span>
+        <div class="preset-btn-list" id="presetAccountBtnList">
+          <button type="button" class="btn secondary small" onclick="quickDemoLogin('overflow7777')">1. 오버플로우 (인하·성균관·한양)</button>
+          <button type="button" class="btn secondary small" onclick="quickDemoLogin('hong7777')">2. 홍길동 (연세·고려·중앙)</button>
+          <button type="button" class="btn secondary small" onclick="quickDemoLogin('transfer7777')">3. 편입생 (서울·서강·경희)</button>
+        </div>
+      </div>
     </div>
   </div>
 
