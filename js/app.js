@@ -1,6 +1,6 @@
 const STORAGE_KEY = 'transfer_prep_prototype_v1';
 
-// 기본 내장 대학 데이터 (로컬 실행 폴백용) + data/universities.json 비동기 연동
+// 기본 내장 대학 데이터베이스 (로컬 실행 폴백용) + data/universities.json 비동기 연동
 let UNIV_DATA = {
   universityList: [
     '서울대', '연세대(신촌)', '고려대(서울)', '서강대', '성균관대', '한양대',
@@ -66,36 +66,6 @@ let UNIV_DATA = {
     '성신여대': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><polygon points="50,20 54,42 76,46 56,54 52,76 44,56 22,50 42,44" stroke="currentColor" stroke-width="3" fill="none"/><text x="50" y="88" font-size="8.5" font-weight="900" text-anchor="middle" fill="currentColor">SUNGSHIN</text></svg>`,
     'default': `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" fill="none"/><polygon points="50,22 82,40 50,56 18,40" stroke="currentColor" stroke-width="3.5" fill="none"/><path d="M30 46 V66 C30 76, 70 76, 70 66 V46" stroke="currentColor" stroke-width="3.5" fill="none"/><circle cx="50" cy="50" r="6" fill="currentColor"/></svg>`
   },
-  defaultCriteria: {
-    qualification: {
-      title: '지원 자격·학점',
-      items: [
-        { label: '지원 선발 구분', text: '국내 4년제 대학 2학년(4학기) 이상 수료(예정)자' },
-        { label: '이수 학점 기준', text: '통상 65~70학점 이상 취득 권장 (전적대학 성적 평점 2.0 이상)' }
-      ]
-    },
-    exam: {
-      title: '시험 과목·범위',
-      items: [
-        { label: '자연계열 필기', text: '편입수학(미적분학, 선형대수) 및 전공 기초 + 편입영어' },
-        { label: '인문계열 필기', text: '편입영어(독해·논리·문법·어휘) 100% 필답고사' }
-      ]
-    },
-    language: {
-      title: '어학·자격증',
-      items: [
-        { label: '공인어학 기준', text: '자체 필답고사 실시 (공인영어 제출 요건은 학과별 요강 참조)' },
-        { label: '가산점 기준', text: '국가공인 기사 자격증 및 공모전 입상 실적 학업계획서 반영' }
-      ]
-    },
-    schedule: {
-      title: '제출 서류·일정',
-      items: [
-        { label: '원서 접수 기간', text: '12월 중순 예정 (진학사/유웨이 및 입학처 온라인 접수)' },
-        { label: '필기 시험일', text: '1월 중 주말 실시 (대학별 고사 일정 중복 확인 필요)' }
-      ]
-    }
-  },
   specialCriteria: {
     '서울대': {
       qualification: {
@@ -131,7 +101,6 @@ let UNIV_DATA = {
   }
 };
 
-// 대학별 전형 데이터 생성기
 function getAdmissionCriteria(uni, unit, year, type) {
   if (UNIV_DATA.specialCriteria && UNIV_DATA.specialCriteria[uni]) {
     const spec = UNIV_DATA.specialCriteria[uni];
@@ -189,10 +158,9 @@ function getEmblemSvg(uniName) {
   return UNIV_DATA.emblems ? UNIV_DATA.emblems['default'] : '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="currentColor" fill="none"/></svg>';
 }
 
-// 기본 앱 상태
 const defaultState = {
   user: null,
-  activeTargetIndex: 0,
+  activeTargetIndex: 0, // null 이면 아무 대학도 미선택 상태
   targets: [
     {
       id: 1,
@@ -226,7 +194,8 @@ const defaultState = {
 
 let appState;
 try {
-  appState = { ...defaultState, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') };
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  appState = { ...defaultState, ...saved };
   if (!appState.targets || appState.targets.length === 0) appState.targets = [...defaultState.targets];
 } catch (e) {
   appState = { ...defaultState };
@@ -235,6 +204,10 @@ try {
 let currentPage = 'home';
 let activeCategoryKey = 'qualification';
 const years = Array.from({ length: 11 }, (_, i) => String(2020 + i));
+
+function isLoggedIn() {
+  return Boolean(appState.user && appState.user.isLoggedIn);
+}
 
 function persist() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
@@ -254,9 +227,11 @@ function escapeHtml(s) {
 }
 
 function getCurrentTarget() {
+  if (!isLoggedIn()) return null;
+  if (appState.activeTargetIndex === null || appState.activeTargetIndex === undefined) return null;
   if (!appState.targets.length) return null;
-  const idx = Math.min(Math.max(appState.activeTargetIndex || 0, 0), appState.targets.length - 1);
-  return appState.targets[idx];
+  if (appState.activeTargetIndex < 0 || appState.activeTargetIndex >= appState.targets.length) return null;
+  return appState.targets[appState.activeTargetIndex];
 }
 
 function calcTargetProgress(target) {
@@ -283,13 +258,13 @@ function handleBackAction() {
 }
 
 /* =========================================================
-   로그인/인증 인터랙션 함수 (오버플로우 전용 계정 연동)
+   로그인/인증 인터랙션 함수
    ========================================================= */
 function renderHeaderAuth() {
   const container = document.getElementById('headerAuthArea');
   if (!container) return;
 
-  if (appState.user && appState.user.isLoggedIn) {
+  if (isLoggedIn()) {
     container.innerHTML = `
       <div class="user-profile-chip" onclick="handleUserLogoutPrompt()" title="클릭하여 로그아웃">
         <span class="user-dot"></span>
@@ -326,14 +301,9 @@ function executeLogin() {
     return;
   }
 
-  let nickname = '오버플로우 님';
-  if (id === 'overflow7777') {
-    nickname = '오버플로우 님';
-  } else {
-    nickname = id + ' 님';
-  }
-
+  let nickname = id === 'overflow7777' ? '오버플로우 님' : id + ' 님';
   appState.user = { isLoggedIn: true, name: nickname, id: id, agreedTerms: true };
+  if (appState.activeTargetIndex === undefined) appState.activeTargetIndex = 0;
   persist();
   closeLoginModal();
   renderScreen();
@@ -342,6 +312,7 @@ function executeLogin() {
 
 function quickDemoLogin() {
   appState.user = { isLoggedIn: true, name: '오버플로우 님', id: 'overflow7777', agreedTerms: true };
+  if (appState.activeTargetIndex === undefined) appState.activeTargetIndex = 0;
   persist();
   closeLoginModal();
   renderScreen();
@@ -357,6 +328,16 @@ function handleUserLogoutPrompt() {
   }
 }
 
+function renderLoginRequiredBox(desc = '로그인 후 나만의 목표 대학과 편입 준비 현황을 확인하실 수 있습니다.') {
+  return `
+  <div class="login-lock-card">
+    <div class="login-lock-icon">🔒</div>
+    <h3>로그인이 필요한 서비스입니다</h3>
+    <p>${desc}</p>
+    <button class="btn" style="max-width:220px;margin:0 auto" onclick="openLoginModal()">로그인하고 내 정보 보기</button>
+  </div>`;
+}
+
 function renderScreen() {
   renderHeaderAuth();
 
@@ -367,7 +348,7 @@ function renderScreen() {
   const screen = document.getElementById('appScreen');
   if (currentPage === 'home') {
     screen.innerHTML = renderHome();
-    setupCardDnD();
+    if (isLoggedIn()) setupCardDnD();
   }
   if (currentPage === 'search') screen.innerHTML = renderSearch();
   if (currentPage === 'list') screen.innerHTML = renderList();
@@ -380,19 +361,77 @@ function renderScreen() {
    1. 홈 화면 (Home)
    ========================================================= */
 function renderHome() {
+  // 비로그인 시 목표 대학/우선순위/퀵메뉴 숨김 처리
+  if (!isLoggedIn()) {
+    return `
+    <div class="eyebrow">DASHBOARD · TRANSFER ASSISTANT</div>
+    <h1>편입 준비,<br>AI 비서와 완벽하게.</h1>
+    <p class="sub">로그인하시면 설정한 목표 대학의 전형 조건과 체크리스트를 한눈에 관리할 수 있습니다.</p>
+    
+    <div class="banner-action">
+      <h2>맞춤형 편입 준비 시작하기</h2>
+      <p>상단 또는 아래 로그인 버튼으로 접속해 26개 주요 대학 모집요강과 나의 준비 현황을 확인하세요.</p>
+      <button class="btn" onclick="openLoginModal()">로그인하여 내 대학 불러오기 →</button>
+    </div>
+
+    ${renderLoginRequiredBox('비로그인 상태에서는 저장된 목표 대학과 우선순위, 퀵메뉴 정보가 표시되지 않습니다.')}`;
+  }
+
   const target = getCurrentTarget();
-  const prog = target ? calcTargetProgress(target) : 0;
-  
   const top3 = appState.targets.slice(0, 3);
   const badgesHtml = top3.map((t, idx) => `
     <div class="rank-pill-item ${appState.activeTargetIndex === idx ? 'active' : ''}" onclick="selectTargetByRank(${idx})">
       <span><b>${idx + 1}순위</b> ${escapeHtml(t.university)}</span>
-      <small>${calcTargetProgress(t)}%</small>
+      <small>${appState.activeTargetIndex === idx ? '선택됨 · 진행률 ' : '진행률 '}${calcTargetProgress(t)}%</small>
     </div>
   `).join('');
 
+  // 대학이 선택된 경우에만 퀵메뉴 표시 (같은 대학 재클릭 해제 시 퀵메뉴도 숨김)
+  const quickMenuSection = target ? `
+    <div class="section-title-row">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="mini-emblem-badge">
+          ${getEmblemSvg(target.university)}
+        </div>
+        <h3 style="margin:0">현재 선택: ${escapeHtml(target.university)}</h3>
+      </div>
+      <span class="section-tag">QUICK MENU</span>
+    </div>
+
+    <div class="tile-grid">
+      <button class="quick-tile" onclick="openCategoryView('qualification')">
+        <div>
+          <div class="title">지원 자격·학점</div>
+          <div class="desc">수료 학점 요건 확인</div>
+        </div>
+        <div class="arrow">조회 →</div>
+      </button>
+      <button class="quick-tile" onclick="openCategoryView('exam')">
+        <div>
+          <div class="title">시험 과목·범위</div>
+          <div class="desc">필기·서류 전형 요소</div>
+        </div>
+        <div class="arrow">조회 →</div>
+      </button>
+      <button class="quick-tile" onclick="openCategoryView('language')">
+        <div>
+          <div class="title">어학·자격증</div>
+          <div class="desc">공인영어 및 가산점</div>
+        </div>
+        <div class="arrow">조회 →</div>
+      </button>
+      <button class="quick-tile" onclick="openCategoryView('schedule')">
+        <div>
+          <div class="title">제출 서류·일정</div>
+          <div class="desc">원서 접수 및 일정표</div>
+        </div>
+        <div class="arrow">조회 →</div>
+      </button>
+    </div>
+  ` : '';
+
   return `
-  <div class="eyebrow">${appState.user && appState.user.isLoggedIn ? `WELCOME BACK, ${escapeHtml(appState.user.name)}` : 'DASHBOARD · TRANSFER ASSISTANT'}</div>
+  <div class="eyebrow">WELCOME BACK, ${escapeHtml(appState.user.name)}</div>
   <h1>편입 준비,<br>AI 비서와 완벽하게.</h1>
   <p class="sub">다중 목표 대학의 전형 조건을 한눈에 비교하고 관리하세요.</p>
   
@@ -402,62 +441,18 @@ function renderHome() {
     <button class="btn" onclick="navigateTo('search')">+ 목표 대학 추가 / 요강 탐색 →</button>
   </div>
 
-  <div class="stats-grid">
-    <div class="stat-box">
-      <div>
-        <span class="lbl">현재 선택 대학 진행률</span>
-        <strong>${prog}%</strong>
-      </div>
-      <div class="progress-track"><div class="progress-fill" style="width:${prog}%"></div></div>
+  <!-- 가로 전체로 확장된 우선순위 카드 -->
+  <div class="priority-full-box">
+    <div class="lbl-row">
+      <span class="lbl">우선순위 목표 대학</span>
+      <span class="hint">대학 탭 시 선택 · 다시 누르면 선택 해제</span>
     </div>
-    <div class="stat-box">
-      <span class="lbl">우선순위 (탭하여 전환)</span>
-      <div class="rank-pills">
-        ${badgesHtml || '<div style="font-size:11px;color:var(--ink-400)">등록된 대학이 없습니다.</div>'}
-      </div>
+    <div class="rank-pills">
+      ${badgesHtml || '<div style="font-size:12px;color:var(--ink-400);padding:6px 0">등록된 목표 대학이 없습니다.</div>'}
     </div>
   </div>
 
-  <div class="section-title-row">
-    <div style="display:flex;align-items:center;gap:8px">
-      <div class="mini-emblem-badge">
-        ${target ? getEmblemSvg(target.university) : getEmblemSvg('default')}
-      </div>
-      <h3 style="margin:0">현재 선택: ${target ? escapeHtml(target.university) : '미선택'}</h3>
-    </div>
-    <span class="section-tag">QUICK MENU</span>
-  </div>
-
-  <div class="tile-grid">
-    <button class="quick-tile" onclick="openCategoryView('qualification')">
-      <div>
-        <div class="title">지원 자격·학점</div>
-        <div class="desc">수료 학점 요건 확인</div>
-      </div>
-      <div class="arrow">조회 →</div>
-    </button>
-    <button class="quick-tile" onclick="openCategoryView('exam')">
-      <div>
-        <div class="title">시험 과목·범위</div>
-        <div class="desc">필기·서류 전형 요소</div>
-      </div>
-      <div class="arrow">조회 →</div>
-    </button>
-    <button class="quick-tile" onclick="openCategoryView('language')">
-      <div>
-        <div class="title">어학·자격증</div>
-        <div class="desc">공인영어 및 가산점</div>
-      </div>
-      <div class="arrow">조회 →</div>
-    </button>
-    <button class="quick-tile" onclick="openCategoryView('schedule')">
-      <div>
-        <div class="title">제출 서류·일정</div>
-        <div class="desc">원서 접수 및 일정표</div>
-      </div>
-      <div class="arrow">조회 →</div>
-    </button>
-  </div>
+  ${quickMenuSection}
 
   <div class="section-title-row" style="margin-top:24px">
     <div>
@@ -481,7 +476,7 @@ function renderHome() {
         <p class="sub" style="margin:4px 0 10px">${escapeHtml(t.year)}학년도 · ${escapeHtml(t.type)}</p>
         <div class="card-actions">
           <button class="btn small ${appState.activeTargetIndex === idx ? 'ghost' : 'secondary'}" onclick="selectTargetByRank(${idx})">
-            ${appState.activeTargetIndex === idx ? '✓ 현재 선택됨' : '이 대학 선택'}
+            ${appState.activeTargetIndex === idx ? '✓ 현재 선택됨 (해제)' : '이 대학 선택'}
           </button>
           <button class="btn small secondary" onclick="jumpToChecklist(${idx})">체크리스트</button>
           <button class="btn small danger btn-del-compact" onclick="deleteTargetItem(${idx})">삭제</button>
@@ -491,11 +486,19 @@ function renderHome() {
   </div>`;
 }
 
+// 같은 대학을 다시 클릭하면 선택 해제 (null), 다른 대학 클릭 시 선택
 function selectTargetByRank(idx) {
-  appState.activeTargetIndex = idx;
-  persist();
-  renderScreen();
-  showToast(`${idx + 1}순위 대학으로 전환되었습니다.`);
+  if (appState.activeTargetIndex === idx) {
+    appState.activeTargetIndex = null;
+    persist();
+    renderScreen();
+    showToast('대학 선택이 해제되었습니다.');
+  } else {
+    appState.activeTargetIndex = idx;
+    persist();
+    renderScreen();
+    showToast(`${idx + 1}순위 대학(${appState.targets[idx].university})이 선택되었습니다.`);
+  }
 }
 
 function jumpToChecklist(idx) {
@@ -506,9 +509,10 @@ function jumpToChecklist(idx) {
 
 function deleteTargetItem(idx) {
   if (confirm(`'${appState.targets[idx].university}' 목표를 삭제하시겠습니까?`)) {
+    const wasSelected = appState.activeTargetIndex === idx;
     appState.targets.splice(idx, 1);
-    if (appState.activeTargetIndex >= appState.targets.length) {
-      appState.activeTargetIndex = Math.max(0, appState.targets.length - 1);
+    if (wasSelected || appState.activeTargetIndex >= appState.targets.length) {
+      appState.activeTargetIndex = null;
     }
     persist();
     renderScreen();
@@ -522,7 +526,7 @@ function openCategoryView(key) {
 }
 
 /* =========================================================
-   드래그 앤 드롭 순서 변경 (Mobile Touch & PC Mouse)
+   드래그 앤 드롭 순서 변경
    ========================================================= */
 function setupCardDnD() {
   const container = document.getElementById('targetListWrapper');
@@ -564,7 +568,6 @@ function setupCardDnD() {
       }
     });
 
-    // Touch
     let isTouchActive = false;
     handle.addEventListener('touchstart', (e) => {
       isTouchActive = true;
@@ -601,13 +604,13 @@ function setupCardDnD() {
 }
 
 function swapTargetPriority(from, to) {
-  const currentActiveId = appState.targets[appState.activeTargetIndex]?.id;
+  const currentActiveId = appState.activeTargetIndex !== null ? appState.targets[appState.activeTargetIndex]?.id : null;
   const item = appState.targets.splice(from, 1)[0];
   appState.targets.splice(to, 0, item);
 
   if (currentActiveId) {
     const newIdx = appState.targets.findIndex(t => t.id === currentActiveId);
-    appState.activeTargetIndex = newIdx !== -1 ? newIdx : 0;
+    appState.activeTargetIndex = newIdx !== -1 ? newIdx : null;
   }
 
   persist();
@@ -619,6 +622,10 @@ function swapTargetPriority(from, to) {
    2. 대학 추가 및 서울대 전용 UX (Search)
    ========================================================= */
 function renderSearch() {
+  if (!isLoggedIn()) {
+    return `${createTitlebar('목표 대학 추가 / AI 탐색', '', true)}${renderLoginRequiredBox('목표 대학을 추가하고 AI 요강 분석을 이용하려면 먼저 로그인해 주세요.')}`;
+  }
+
   const uList = UNIV_DATA.universityList || [];
   return `
   ${createTitlebar('목표 대학 추가 / AI 탐색', '1 / 4', true)}
@@ -633,7 +640,6 @@ function renderSearch() {
     ${uList.map(u => `<option value="${u}">${u}</option>`).join('')}
   </select>
 
-  <!-- 서울대 선택 시 나타나는 전용 경고 배너 -->
   <div class="notice-banner" id="bannerSnu">
     ⚠️ <strong>서울대학교 지원 안내:</strong> 서울대학교는 <strong>일반편입학을 선발하지 않으며</strong>, 학사편입학만 선발합니다. 편입 전형이 '학사편입'으로 자동 고정되었습니다.
   </div>
@@ -737,11 +743,17 @@ function executeAiScan() {
    3. 준비사항 요약 목록 (List)
    ========================================================= */
 function renderList() {
-  const target = getCurrentTarget();
-  if (!target) {
-    return `<div class="guide-card"><p>등록된 목표 대학이 없습니다.</p><button class="btn" style="margin-top:12px" onclick="navigateTo('search')">+ 목표 대학 추가</button></div>`;
+  if (!isLoggedIn()) {
+    return `${createTitlebar('편입 준비사항 요약', '', true)}${renderLoginRequiredBox('등록한 목표 대학의 전형 요강과 세부 기준을 열람하려면 로그인해 주세요.')}`;
   }
 
+  if (!appState.targets.length) {
+    return `${createTitlebar('편입 준비사항 요약', '2 / 4', true)}<div class="guide-card"><p>등록된 목표 대학이 없습니다.</p><button class="btn" style="margin-top:12px" onclick="navigateTo('search')">+ 목표 대학 추가</button></div>`;
+  }
+
+  // 준비사항 탭 진입 시 선택된 대학이 없으면 첫 번째 대학을 기준으로 표시하되 탭 선택 가능
+  const target = getCurrentTarget() || appState.targets[0];
+  const activeIdx = getCurrentTarget() ? appState.activeTargetIndex : 0;
   const data = getAdmissionCriteria(target.university, target.unit, target.year, target.type);
 
   return `
@@ -750,7 +762,7 @@ function renderList() {
 
   <div class="tab-scroll-wrap">
     ${appState.targets.map((t, idx) => `
-      <button class="pill-tab ${appState.activeTargetIndex === idx ? 'active' : ''}" onclick="selectTargetByRank(${idx})">
+      <button class="pill-tab ${activeIdx === idx ? 'active' : ''}" onclick="selectTargetForSubPage(${idx})">
         ${idx + 1}순위: ${escapeHtml(t.university)}
       </button>
     `).join('')}
@@ -767,28 +779,28 @@ function renderList() {
   <p class="sub" style="margin-top:16px">AI 비서가 추출한 세부 기준을 영역별로 확인하세요.</p>
 
   <div class="tile-grid" style="grid-template-columns:1fr;gap:10px">
-    <button class="quick-tile" style="min-height:76px" onclick="openCategoryView('qualification')">
+    <button class="quick-tile" style="min-height:76px" onclick="openCategoryViewForIdx(${activeIdx}, 'qualification')">
       <div>
         <div class="title">지원 자격·학점</div>
         <div class="desc">수료 학점 요건 및 전적대 성적 평점 기준</div>
       </div>
       <div class="arrow">상세 보기 →</div>
     </button>
-    <button class="quick-tile" style="min-height:76px" onclick="openCategoryView('exam')">
+    <button class="quick-tile" style="min-height:76px" onclick="openCategoryViewForIdx(${activeIdx}, 'exam')">
       <div>
         <div class="title">시험 과목·범위</div>
         <div class="desc">필답고사 과목, 배점 및 전형 방식</div>
       </div>
       <div class="arrow">상세 보기 →</div>
     </button>
-    <button class="quick-tile" style="min-height:76px" onclick="openCategoryView('language')">
+    <button class="quick-tile" style="min-height:76px" onclick="openCategoryViewForIdx(${activeIdx}, 'language')">
       <div>
         <div class="title">어학·자격증</div>
         <div class="desc">공인어학성적 요건 및 가산점 인정 기준</div>
       </div>
       <div class="arrow">상세 보기 →</div>
     </button>
-    <button class="quick-tile" style="min-height:76px" onclick="openCategoryView('schedule')">
+    <button class="quick-tile" style="min-height:76px" onclick="openCategoryViewForIdx(${activeIdx}, 'schedule')">
       <div>
         <div class="title">제출 서류·일정</div>
         <div class="desc">원서 접수 기간 및 필수 서류 제출 일정</div>
@@ -799,15 +811,29 @@ function renderList() {
 
   <div class="card-actions" style="margin-top:20px">
     <button class="btn secondary" onclick="navigateTo('search')">+ 목표 추가</button>
-    <button class="btn" onclick="navigateTo('check')">체크리스트 확인 →</button>
+    <button class="btn" onclick="jumpToChecklist(${activeIdx})">체크리스트 확인 →</button>
   </div>`;
+}
+
+function selectTargetForSubPage(idx) {
+  appState.activeTargetIndex = idx;
+  persist();
+  renderScreen();
+}
+
+function openCategoryViewForIdx(idx, key) {
+  appState.activeTargetIndex = idx;
+  activeCategoryKey = key;
+  persist();
+  navigateTo('detail');
 }
 
 /* =========================================================
    4. 세부 기준 상세 화면 (Detail)
    ========================================================= */
 function renderDetail() {
-  const target = getCurrentTarget();
+  if (!isLoggedIn()) return navigateTo('home');
+  const target = getCurrentTarget() || appState.targets[0];
   if (!target) return navigateTo('home');
 
   const data = getAdmissionCriteria(target.university, target.unit, target.year, target.type);
@@ -861,7 +887,7 @@ function shiftCategory(dir) {
 }
 
 function saveActiveCategoryMemo(catIdx) {
-  const target = getCurrentTarget();
+  const target = getCurrentTarget() || appState.targets[0];
   if (target) {
     target.notes[catIdx] = document.getElementById('memoBox').value.trim();
     persist();
@@ -873,13 +899,17 @@ function saveActiveCategoryMemo(catIdx) {
    5. 대학별 독립 체크리스트 (Checklist)
    ========================================================= */
 function renderCheck() {
-  const target = getCurrentTarget();
-  if (!target) {
-    return `<div class="guide-card"><p>등록된 목표 대학이 없습니다.</p><button class="btn" onclick="navigateTo('search')">+ 목표 대학 추가</button></div>`;
+  if (!isLoggedIn()) {
+    return `${createTitlebar('내 준비 체크리스트', '', true)}${renderLoginRequiredBox('대학별 편입 준비 체크리스트를 관리하려면 로그인해 주세요.')}`;
   }
 
+  if (!appState.targets.length) {
+    return `${createTitlebar('내 준비 체크리스트', '4 / 4', true)}<div class="guide-card"><p>등록된 목표 대학이 없습니다.</p><button class="btn" onclick="navigateTo('search')">+ 목표 대학 추가</button></div>`;
+  }
+
+  const target = getCurrentTarget() || appState.targets[0];
+  const targetIdx = getCurrentTarget() ? appState.activeTargetIndex : 0;
   const completed = target.checks.filter(Boolean).length;
-  const targetIdx = appState.activeTargetIndex;
 
   return `
   ${createTitlebar('내 준비 체크리스트', '4 / 4', true)}
@@ -887,7 +917,7 @@ function renderCheck() {
 
   <div class="tab-scroll-wrap">
     ${appState.targets.map((t, idx) => `
-      <button class="pill-tab ${appState.activeTargetIndex === idx ? 'active' : ''}" onclick="selectTargetByRank(${idx})">
+      <button class="pill-tab ${targetIdx === idx ? 'active' : ''}" onclick="selectTargetForSubPage(${idx})">
         ${idx + 1}순위: ${escapeHtml(t.university)}
       </button>
     `).join('')}
@@ -948,50 +978,66 @@ function resetChecklistForTarget(targetIdx) {
    6. 설정 및 1순위 대표 엠블럼 워터마크 (Profile)
    ========================================================= */
 function renderProfile() {
-  const top1Target = appState.targets[0] || null;
-  const uniName = top1Target ? top1Target.university : '미지정';
-  const emblemSvg = getEmblemSvg(uniName);
+  const loggedIn = isLoggedIn();
+  const top1Target = loggedIn ? (appState.targets[0] || null) : null;
+  const uniName = top1Target ? top1Target.university : '로그인 필요';
+  const emblemSvg = loggedIn && top1Target ? getEmblemSvg(uniName) : getEmblemSvg('default');
+
+  const topShowcaseHtml = loggedIn ? `
+    <div class="emblem-showcase-card">
+      <div class="emblem-watermark">${emblemSvg}</div>
+      <div class="emblem-content">
+        <span class="priority-tag p1" style="display:inline-block;margin-bottom:8px">🥇 1순위 대표 목표 대학교</span>
+        <h2 style="font-size:22px;margin:2px 0 6px;color:var(--ink-900)">${escapeHtml(uniName)}</h2>
+        <p style="font-size:13px;color:var(--ink-700)">
+          ${top1Target ? `${escapeHtml(top1Target.year)}학년도 · ${escapeHtml(top1Target.type)}<br><b>${escapeHtml(top1Target.unit)}</b>` : '홈에서 1순위 목표 대학을 설정하세요.'}
+        </p>
+      </div>
+    </div>
+  ` : `
+    <div class="emblem-showcase-card">
+      <div class="emblem-watermark">${emblemSvg}</div>
+      <div class="emblem-content">
+        <span class="priority-tag p3" style="display:inline-block;margin-bottom:8px">🔒 비로그인 상태</span>
+        <h2 style="font-size:20px;margin:2px 0 6px;color:var(--ink-900)">대표 목표 대학 미표시</h2>
+        <p style="font-size:13px;color:var(--ink-500)">로그인하시면 1순위 대표 목표 대학교와 맞춤 엠블럼이 표시됩니다.</p>
+      </div>
+    </div>
+  `;
 
   return `
   ${createTitlebar('설정 및 계정 관리', '', false)}
   <h1 style="font-size:21px">내 정보와 저장 데이터</h1>
   <p class="sub">등록한 목표 대학과 개인 메모는 기기 브라우저 및 계정에 보관됩니다.</p>
   
-  <div class="emblem-showcase-card">
-    <div class="emblem-watermark">${emblemSvg}</div>
-    <div class="emblem-content">
-      <span class="priority-tag p1" style="display:inline-block;margin-bottom:8px">🥇 1순위 대표 목표 대학교</span>
-      <h2 style="font-size:22px;margin:2px 0 6px;color:var(--ink-900)">${escapeHtml(uniName)}</h2>
-      <p style="font-size:13px;color:var(--ink-700)">
-        ${top1Target ? `${escapeHtml(top1Target.year)}학년도 · ${escapeHtml(top1Target.type)}<br><b>${escapeHtml(top1Target.unit)}</b>` : '홈에서 1순위 목표 대학을 설정하세요.'}
-      </p>
-    </div>
-  </div>
+  ${topShowcaseHtml}
 
   <div class="section-title-row" style="margin-top:24px"><h3>계정 상태</h3></div>
   <div class="guide-card" style="margin:0 0 14px">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
-        <b style="font-size:14px;color:var(--ink-900)">${appState.user && appState.user.isLoggedIn ? escapeHtml(appState.user.name) : '비로그인 사용자'}</b>
-        <p style="font-size:12px;color:var(--ink-500);margin-top:2px">${appState.user && appState.user.isLoggedIn ? `계정 ID: ${escapeHtml(appState.user.id)} (동기화 완료)` : '로그인하고 목표 데이터를 계정에 보관하세요.'}</p>
+        <b style="font-size:14px;color:var(--ink-900)">${loggedIn ? escapeHtml(appState.user.name) : '비로그인 사용자'}</b>
+        <p style="font-size:12px;color:var(--ink-500);margin-top:2px">${loggedIn ? `계정 ID: ${escapeHtml(appState.user.id)} (동기화 완료)` : '로그인하고 목표 데이터를 계정에 보관하세요.'}</p>
       </div>
-      ${appState.user && appState.user.isLoggedIn 
+      ${loggedIn 
         ? `<button class="btn small danger" onclick="handleUserLogoutPrompt()">로그아웃</button>`
         : `<button class="btn small" onclick="openLoginModal()">로그인</button>`
       }
     </div>
   </div>
 
-  <div class="section-title-row" style="margin-top:20px"><h3>데이터 백업 및 복원</h3></div>
-  <button class="btn secondary" onclick="exportAppData()">내 데이터 백업하기 (JSON)</button>
-  
-  <label for="fileBackup" style="margin-top:14px">백업 파일 불러오기</label>
-  <input type="file" id="fileBackup" accept=".json,application/json">
-  <button class="btn secondary" style="margin-top:10px" onclick="importAppData()">백업 데이터 복원</button>
-  <button class="btn ghost danger" style="margin-top:16px" onclick="resetAllAppData()">설정 초기화 (전체 데이터 삭제)</button>
+  ${loggedIn ? `
+    <div class="section-title-row" style="margin-top:20px"><h3>데이터 백업 및 복원</h3></div>
+    <button class="btn secondary" onclick="exportAppData()">내 데이터 백업하기 (JSON)</button>
+    
+    <label for="fileBackup" style="margin-top:14px">백업 파일 불러오기</label>
+    <input type="file" id="fileBackup" accept=".json,application/json">
+    <button class="btn secondary" style="margin-top:10px" onclick="importAppData()">백업 데이터 복원</button>
+    <button class="btn ghost danger" style="margin-top:16px" onclick="resetAllAppData()">설정 초기화 (전체 데이터 삭제)</button>
+  ` : ''}
 
   <div class="tip-box" style="margin-top:16px">
-    💡 <strong>프로토타입 v2.4:</strong> data/universities.json 연동, 오버플로우 계정 연동, 개인정보 처리약관, 26개교 전용 엠블럼, 입학처 직통 링크가 모두 탑재되었습니다.
+    💡 <strong>프로토타입 v2.5:</strong> 비로그인 데이터 보호 모드, 우선순위 전체 카드 & 선택 토글 해제, 오버플로우 전용 계정, 26개교 엠블럼이 모두 적용되었습니다.
   </div>
 
   <!-- 설정 화면 하단 개인정보 처리약관 안내 -->
@@ -1035,7 +1081,8 @@ function importAppData() {
 
 function resetAllAppData() {
   if (confirm('저장된 모든 목표 대학 정보와 체크 상태를 초기화하시겠습니까?')) {
-    appState = { ...defaultState };
+    const currentUser = appState.user;
+    appState = { ...defaultState, user: currentUser };
     persist();
     navigateTo('home');
     showToast('전체 데이터가 초기화되었습니다.');
@@ -1046,7 +1093,7 @@ document.querySelectorAll('.nav-tab-btn').forEach(btn => {
   btn.addEventListener('click', () => navigateTo(btn.dataset.page));
 });
 
-// data/universities.json 비동기 로드 및 초기 렌더링
+// 앱 최초 실행 시에만 data/universities.json 비동기 로드 후 화면 렌더링
 async function fetchUniversityData() {
   try {
     const response = await fetch('./data/universities.json');
