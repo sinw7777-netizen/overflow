@@ -1,4 +1,120 @@
 {
+  "accounts": {
+    "overflow7777": {
+      "id": "overflow7777",
+      "aliases": ["overflow7777", "overflow", "오버플로우"],
+      "pw": "12345678",
+      "name": "오버플로우 님",
+      "label": "1. 오버플로우 (인하·성균관·한양)",
+      "initialTargets": [
+        {
+          "id": 101,
+          "university": "인하대",
+          "year": "2027",
+          "type": "일반편입",
+          "unit": "컴퓨터공학과",
+          "checks": [true, false, false, false],
+          "notes": {
+            "0": "전적대 68학점 이수 확인 완료"
+          }
+        },
+        {
+          "id": 102,
+          "university": "성균관대",
+          "year": "2027",
+          "type": "일반편입",
+          "unit": "소프트웨어학과",
+          "checks": [false, false, false, false],
+          "notes": {}
+        },
+        {
+          "id": 103,
+          "university": "한양대",
+          "year": "2027",
+          "type": "일반편입",
+          "unit": "컴퓨터소프트웨어학부",
+          "checks": [true, true, false, false],
+          "notes": {}
+        }
+      ]
+    },
+    "hong7777": {
+      "id": "hong7777",
+      "aliases": ["hong7777", "hong", "홍길동"],
+      "pw": "12345678",
+      "name": "홍길동 님",
+      "label": "2. 홍길동 (연세·고려·중앙)",
+      "initialTargets": [
+        {
+          "id": 201,
+          "university": "연세대(신촌)",
+          "year": "2027",
+          "type": "일반편입",
+          "unit": "경영학과",
+          "checks": [true, true, true, false],
+          "notes": {
+            "0": "2학년 수료 학점 충족, 편입논술 기출 분석 중"
+          }
+        },
+        {
+          "id": 202,
+          "university": "고려대(서울)",
+          "year": "2027",
+          "type": "일반편입",
+          "unit": "경제학과",
+          "checks": [true, false, false, false],
+          "notes": {}
+        },
+        {
+          "id": 203,
+          "university": "중앙대",
+          "year": "2027",
+          "type": "일반편입",
+          "unit": "미디어커뮤니케이션학부",
+          "checks": [true, true, false, false],
+          "notes": {}
+        }
+      ]
+    },
+    "transfer7777": {
+      "id": "transfer7777",
+      "aliases": ["transfer7777", "transfer", "편입생"],
+      "pw": "12345678",
+      "name": "편입생 님",
+      "label": "3. 편입생 (서울·서강·경희)",
+      "initialTargets": [
+        {
+          "id": 301,
+          "university": "서울대",
+          "year": "2027",
+          "type": "학사편입",
+          "unit": "컴퓨터공학부",
+          "checks": [true, true, true, true],
+          "notes": {
+            "0": "학사학위 취득 예정 및 TEPS 정기시험 성적표 확보 완료"
+          }
+        },
+        {
+          "id": 302,
+          "university": "서강대",
+          "year": "2027",
+          "type": "학사편입",
+          "unit": "인공지능학과",
+          "checks": [true, false, true, false],
+          "notes": {}
+        },
+        {
+          "id": 303,
+          "university": "경희대",
+          "year": "2027",
+          "type": "일반편입",
+          "unit": "소프트웨어융합학과",
+          "checks": [false, false, false, false],
+          "notes": {}
+        }
+      ]
+    }
+  },
   "universityList": [
     "서울대",
     "연세대(신촌)",
