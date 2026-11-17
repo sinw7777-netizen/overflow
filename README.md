@@ -9,7 +9,7 @@
 
 | 구분 | 링크 및 경로 | 비고 |
 |---|---|---|
-| **웹 실행 (단일 버전)** | https://sinw7777-netizen.github.io/overflow/pages/ver0.5.html | 버전 업그레이드 시 파일명 수동 갱신 |
+| **웹 실행 (단일 버전)** | https://sinw7777-netizen.github.io/overflow/pages/prototype_ver0.5.html | 버전 업그레이드 시 파일명 수동 갱신 |
 | **웹 실행 (루트 메인)** | https://sinw7777-netizen.github.io/overflow/ | 루트 `index.html` 기준 최신 배포본 |
 | **팀 노션 (주차별 산출물)** | https://app.notion.com/p/3dcde62447b280daae42ccbf36ceb36e | 주차별 기획·회의록·산출물 통합 관리 |
 | **기획 문서 (PRD)** | `pages/편입 준비 한눈에_ver0.5_26.11.10_PRD.pdf` | 제품 요구사항 정의서 원본 PDF |
