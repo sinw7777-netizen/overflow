@@ -1,8 +1,9 @@
-const SESSION_KEY = 'transfer_prep_active_session_v2';
+const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbyEkq7ZUIukeqsmeR0TJ4QP50opig9oSRPt76r8VYgBreX5gDb6N0Knyr8p5QCCFkTd/exec';
+const SESSION_KEY = 'transfer_prep_active_session_v3';
 const USER_STORAGE_PREFIX = 'transfer_prep_user_';
 const UNIFIED_PW = '12345678';
 
-// 기본 내장 데이터베이스 (로컬 실행 폴백용) + data/universities.json 비동기 로드 시 덮어쓰기됨
+// 기본 내장 데이터베이스 (로컬 실행 폴백용) + data/universities.json 비동기 로드 시 갱신됨
 let UNIV_DATA = {
   accounts: {
     'overflow7777': {
@@ -213,7 +214,6 @@ let UNIV_DATA = {
   }
 };
 
-// JSON 내 accounts 객체 참조 헬퍼
 function getAccountsMap() {
   return (UNIV_DATA && UNIV_DATA.accounts) ? UNIV_DATA.accounts : {};
 }
@@ -294,28 +294,25 @@ function findPresetAccount(inputId) {
   return null;
 }
 
-// JSON에 정의된 계정 정보와 localStorage를 결합하여 계정별 상태 로드
-function loadUserAccountState(accountId) {
-  const accounts = getAccountsMap();
-  const acc = accounts[accountId];
-  if (!acc) return null;
+// 로컬 캐시 불러오기 (빠른 초기 렌더링용)
+function loadLocalCacheState(accountId, accountName, accountPw) {
   try {
-    const raw = localStorage.getItem(USER_STORAGE_PREFIX + acc.id);
+    const raw = localStorage.getItem(USER_STORAGE_PREFIX + accountId);
     if (raw) {
       const parsed = JSON.parse(raw);
       return {
-        user: { isLoggedIn: true, name: acc.name, id: acc.id, agreedTerms: true },
+        user: { isLoggedIn: true, name: accountName, id: accountId, pw: accountPw, agreedTerms: true },
         activeTargetIndex: parsed.activeTargetIndex !== undefined ? parsed.activeTargetIndex : 0,
-        targets: Array.isArray(parsed.targets) && parsed.targets.length > 0 ? parsed.targets : cloneInitialTargets(acc.id)
+        targets: Array.isArray(parsed.targets) && parsed.targets.length > 0 ? parsed.targets : cloneInitialTargets(accountId)
       };
     }
   } catch (e) {
-    console.warn('계정 데이터 파싱 오류, JSON 초기 데이터를 로드합니다.');
+    console.warn('로컬 캐시 파싱 실패');
   }
   return {
-    user: { isLoggedIn: true, name: acc.name, id: acc.id, agreedTerms: true },
+    user: { isLoggedIn: true, name: accountName, id: accountId, pw: accountPw, agreedTerms: true },
     activeTargetIndex: 0,
-    targets: cloneInitialTargets(acc.id)
+    targets: cloneInitialTargets(accountId)
   };
 }
 
@@ -325,12 +322,104 @@ let appState = {
   targets: []
 };
 
+let syncStatusText = 'Google Sheets 실시간 연동됨';
+let syncTimer = null;
+
+// Google Sheets API(GET)로 계정 로그인 및 데이터 조회
+async function fetchAccountFromSheet(canonicalId, pw) {
+  const url = `${SHEET_API_URL}?id=${encodeURIComponent(canonicalId)}&pw=${encodeURIComponent(pw)}&_t=${Date.now()}`;
+  const response = await fetch(url, { method: 'GET', redirect: 'follow' });
+  if (!response.ok) throw new Error('네트워크 응답 오류');
+  return await response.json();
+}
+
+// Google Sheets API(POST)로 현재 계정의 목표 대학·체크리스트·메모 실시간 저장
+async function pushStateToSheet() {
+  if (!isLoggedIn() || !appState.user.id || !appState.user.pw) return;
+  syncStatusText = '시트 동기화 중...';
+  try {
+    const payload = {
+      id: appState.user.id,
+      pw: appState.user.pw,
+      data: {
+        activeTargetIndex: appState.activeTargetIndex,
+        targets: appState.targets
+      }
+    };
+    // Apps Script CORS 프리플라이트(OPTIONS) 우회를 위해 text/plain 헤더 사용
+    const response = await fetch(SHEET_API_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json();
+    if (result && result.ok) {
+      syncStatusText = 'Google Sheets 동기화 완료';
+    } else {
+      syncStatusText = '시트 저장 확인 필요';
+    }
+  } catch (err) {
+    console.warn('Google Sheets 동기화 실패:', err);
+    syncStatusText = '오프라인 로컬 저장됨';
+  }
+}
+
+function scheduleSheetSync() {
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    pushStateToSheet();
+  }, 400);
+}
+
+// 수동으로 Google Sheets의 최신 데이터를 다시 불러오기
+async function refreshFromGoogleSheet() {
+  if (!isLoggedIn()) return;
+  showToast('구글 시트에서 최신 데이터를 불러오는 중...');
+  try {
+    const res = await fetchAccountFromSheet(appState.user.id, appState.user.pw);
+    if (res && res.ok) {
+      if (res.data && Array.isArray(res.data.targets)) {
+        appState.targets = res.data.targets;
+        appState.activeTargetIndex = res.data.activeTargetIndex !== undefined ? res.data.activeTargetIndex : 0;
+      }
+      saveLocalOnly();
+      syncStatusText = 'Google Sheets 최신 동기화 완료';
+      renderScreen();
+      showToast('구글 시트 데이터와 동기화되었습니다!');
+    } else {
+      showToast(res.message || '시트 데이터 조회에 실패했습니다.');
+    }
+  } catch (e) {
+    showToast('네트워크 오류로 시트에 연결하지 못했습니다.');
+  }
+}
+
 function restoreSessionAfterJsonLoad() {
   try {
     const savedSession = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
-    const accounts = getAccountsMap();
-    if (savedSession.currentUserId && accounts[savedSession.currentUserId]) {
-      appState = loadUserAccountState(savedSession.currentUserId);
+    if (savedSession.currentUserId && savedSession.currentUserPw) {
+      const cachedName = savedSession.currentUserName || (findPresetAccount(savedSession.currentUserId)?.name) || (savedSession.currentUserId + ' 님');
+      appState = loadLocalCacheState(savedSession.currentUserId, cachedName, savedSession.currentUserPw);
+      renderScreen();
+
+      // 백그라운드에서 Google Sheets 최신 데이터로 동기화
+      fetchAccountFromSheet(savedSession.currentUserId, savedSession.currentUserPw)
+        .then(res => {
+          if (res && res.ok && isLoggedIn() && appState.user.id === savedSession.currentUserId) {
+            appState.user.name = res.user.name || cachedName;
+            if (res.data && Array.isArray(res.data.targets) && res.data.targets.length > 0) {
+              appState.targets = res.data.targets;
+              appState.activeTargetIndex = res.data.activeTargetIndex !== undefined ? res.data.activeTargetIndex : 0;
+            }
+            saveLocalOnly();
+            syncStatusText = 'Google Sheets 실시간 연동됨';
+            renderScreen();
+          }
+        })
+        .catch(() => {
+          syncStatusText = '로컬 캐시 모드';
+        });
       return;
     }
   } catch (e) {
@@ -339,7 +428,6 @@ function restoreSessionAfterJsonLoad() {
   appState = { user: null, activeTargetIndex: 0, targets: cloneInitialTargets('overflow7777') };
 }
 
-// 로그인 모달 내 프리셋 계정 버튼을 JSON의 accounts 목록 기준으로 동적 갱신
 function renderPresetAccountButtons() {
   const listEl = document.getElementById('presetAccountBtnList');
   if (!listEl) return;
@@ -362,9 +450,13 @@ function isLoggedIn() {
   return Boolean(appState.user && appState.user.isLoggedIn);
 }
 
-function persist() {
+function saveLocalOnly() {
   if (isLoggedIn() && appState.user.id) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ currentUserId: appState.user.id }));
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      currentUserId: appState.user.id,
+      currentUserPw: appState.user.pw,
+      currentUserName: appState.user.name
+    }));
     localStorage.setItem(USER_STORAGE_PREFIX + appState.user.id, JSON.stringify({
       activeTargetIndex: appState.activeTargetIndex,
       targets: appState.targets
@@ -374,11 +466,19 @@ function persist() {
   }
 }
 
+// 로컬 저장 + Google Sheets 클라우드 동기화
+function persist() {
+  saveLocalOnly();
+  if (isLoggedIn()) {
+    scheduleSheetSync();
+  }
+}
+
 function showToast(msg = '저장되었습니다.') {
   const el = document.getElementById('toastMsg');
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 1600);
+  setTimeout(() => el.classList.remove('show'), 1800);
 }
 
 function escapeHtml(s) {
@@ -419,7 +519,7 @@ function handleBackAction() {
 }
 
 /* =========================================================
-   로그인/인증 인터랙션 함수 (JSON accounts 데이터 기반)
+   로그인/인증 인터랙션 함수 (Google Sheets API 실시간 연동)
    ========================================================= */
 function renderHeaderAuth() {
   const container = document.getElementById('headerAuthArea');
@@ -448,7 +548,56 @@ function closeLoginModal() {
   document.getElementById('loginOverlay').classList.remove('show');
 }
 
-function executeLogin() {
+async function processSheetLogin(rawId, pwInput) {
+  const preset = findPresetAccount(rawId);
+  const queryId = preset ? preset.id : rawId;
+
+  showToast('구글 시트 계정 인증 및 데이터 불러오는 중...');
+  try {
+    const res = await fetchAccountFromSheet(queryId, pwInput);
+    if (!res || !res.ok) {
+      showToast((res && res.message) ? res.message : '아이디 또는 비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    const userId = res.user.id;
+    const userName = res.user.name || (preset ? preset.name : userId + ' 님');
+    let targets = [];
+    let activeIdx = 0;
+    let isFirstInit = false;
+
+    if (res.data && Array.isArray(res.data.targets) && res.data.targets.length > 0) {
+      targets = res.data.targets;
+      activeIdx = res.data.activeTargetIndex !== undefined ? res.data.activeTargetIndex : 0;
+    } else {
+      // 시트의 D열(data_json)이 비어있는 최초 로그인 시 기본 대학 데이터 세팅 후 시트에 저장
+      targets = cloneInitialTargets(userId);
+      activeIdx = 0;
+      isFirstInit = true;
+    }
+
+    appState = {
+      user: { isLoggedIn: true, name: userName, id: userId, pw: pwInput, agreedTerms: true },
+      activeTargetIndex: activeIdx,
+      targets: targets
+    };
+
+    saveLocalOnly();
+    if (isFirstInit) {
+      await pushStateToSheet();
+    }
+
+    syncStatusText = 'Google Sheets 실시간 연동됨';
+    closeLoginModal();
+    renderScreen();
+    showToast(`${userName} 계정으로 로그인되었습니다!`);
+  } catch (err) {
+    console.error(err);
+    showToast('구글 시트 서버 연결에 실패했습니다. 네트워크 상태를 확인해 주세요.');
+  }
+}
+
+async function executeLogin() {
   const idInput = document.getElementById('loginId').value.trim();
   const pwInput = document.getElementById('loginPw').value.trim();
   const agree = document.getElementById('loginAgree').checked;
@@ -463,42 +612,29 @@ function executeLogin() {
     return;
   }
 
-  const matchedAccount = findPresetAccount(idInput);
-  if (!matchedAccount || pwInput !== matchedAccount.pw) {
-    showToast('등록된 계정 아이디 또는 비밀번호(12345678)를 확인해 주세요.');
-    return;
-  }
-
-  appState = loadUserAccountState(matchedAccount.id);
-  persist();
-  closeLoginModal();
-  renderScreen();
-  showToast(`${matchedAccount.name} 계정으로 로그인되었습니다!`);
+  await processSheetLogin(idInput, pwInput);
 }
 
-function quickDemoLogin(targetId = 'overflow7777') {
+async function quickDemoLogin(targetId = 'overflow7777') {
   const agreeEl = document.getElementById('loginAgree');
   if (agreeEl && !agreeEl.checked) {
     agreeEl.checked = true;
   }
   const accounts = getAccountsMap();
   const matchedAccount = findPresetAccount(targetId) || accounts['overflow7777'];
-  if (!matchedAccount) return;
+  const loginId = matchedAccount ? matchedAccount.id : targetId;
+  const loginPw = (matchedAccount && matchedAccount.pw) ? matchedAccount.pw : UNIFIED_PW;
 
-  document.getElementById('loginId').value = matchedAccount.id;
-  document.getElementById('loginPw').value = matchedAccount.pw || UNIFIED_PW;
+  document.getElementById('loginId').value = loginId;
+  document.getElementById('loginPw').value = loginPw;
 
-  appState = loadUserAccountState(matchedAccount.id);
-  persist();
-  closeLoginModal();
-  renderScreen();
-  showToast(`${matchedAccount.name} 계정 데이터를 불러왔습니다.`);
+  await processSheetLogin(loginId, loginPw);
 }
 
 function handleUserLogoutPrompt() {
   if (confirm(`현재 '${appState.user.name}' (${appState.user.id}) 계정으로 로그인되어 있습니다.\n로그아웃하시겠습니까?`)) {
     appState.user = null;
-    persist();
+    saveLocalOnly();
     renderScreen();
     showToast('로그아웃되었습니다.');
   }
@@ -545,7 +681,7 @@ function renderHome() {
     
     <div class="banner-action">
       <h2>맞춤형 편입 준비 시작하기</h2>
-      <p>오버플로우·홍길동·편입생 3개 계정 중 하나로 로그인해 계정별 맞춤 모집요강과 준비 현황을 확인하세요.</p>
+      <p>Google Sheets 클라우드 DB와 실시간 동기화되어 PC와 모바일 어디서나 동일한 데이터를 불러옵니다.</p>
       <button class="btn" onclick="openLoginModal()">로그인하여 내 대학 불러오기 →</button>
     </div>
 
@@ -1063,7 +1199,7 @@ function saveActiveCategoryMemo(catIdx) {
   if (target) {
     target.notes[catIdx] = document.getElementById('memoBox').value.trim();
     persist();
-    showToast('메모가 저장되었습니다.');
+    showToast('메모가 저장 및 시트에 동기화됩니다.');
   }
 }
 
@@ -1120,7 +1256,7 @@ function renderCheck() {
   `).join('')}
 
   <div class="tip-box">
-    💡 체크리스트 상태는 계정 및 대학별로 독립 보관됩니다. 상단 탭을 전환하여 대학별 준비 상태를 점검해 보세요.
+    💡 체크리스트 상태는 Google Sheets 계정에 실시간 동기화되어 다른 기기에서도 그대로 이어서 확인할 수 있습니다.
   </div>
 
   <div class="card-actions" style="margin-top:16px">
@@ -1179,23 +1315,28 @@ function renderProfile() {
 
   return `
   ${createTitlebar('설정 및 계정 관리', '', false)}
-  <h1 style="font-size:21px">내 정보와 저장 데이터</h1>
-  <p class="sub">등록한 목표 대학과 개인 메모는 로그인한 계정별로 독립 보관됩니다.</p>
+  <h1 style="font-size:21px">내 정보와 클라우드 동기화</h1>
+  <p class="sub">등록한 목표 대학과 개인 메모는 Google Sheets DB에 실시간 동기화됩니다.</p>
   
   ${topShowcaseHtml}
 
-  <div class="section-title-row" style="margin-top:24px"><h3>계정 상태 및 전환</h3></div>
+  <div class="section-title-row" style="margin-top:24px"><h3>계정 상태 및 동기화</h3></div>
   <div class="guide-card" style="margin:0 0 14px">
-    <div style="display:flex;justify-content:space-between;align-items:center">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
       <div>
         <b style="font-size:14px;color:var(--ink-900)">${loggedIn ? escapeHtml(appState.user.name) : '비로그인 사용자'}</b>
-        <p style="font-size:12px;color:var(--ink-500);margin-top:2px">${loggedIn ? `계정 ID: ${escapeHtml(appState.user.id)} (JSON 계정 연동됨)` : '로그인하고 계정별 목표 데이터를 불러오세요.'}</p>
+        <p style="font-size:12px;color:var(--ink-500);margin-top:2px">${loggedIn ? `ID: ${escapeHtml(appState.user.id)} · ${escapeHtml(syncStatusText)}` : '로그인하고 Google Sheets 계정 데이터를 불러오세요.'}</p>
       </div>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;flex-shrink:0">
         <button class="btn small secondary" onclick="openLoginModal()">계정 전환</button>
         ${loggedIn ? `<button class="btn small danger" onclick="handleUserLogoutPrompt()">로그아웃</button>` : ''}
       </div>
     </div>
+    ${loggedIn ? `
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+        <button class="btn secondary small" style="width:100%" onclick="refreshFromGoogleSheet()">🔄 구글 시트에서 최신 데이터 불러오기</button>
+      </div>
+    ` : ''}
   </div>
 
   ${loggedIn ? `
@@ -1205,26 +1346,31 @@ function renderProfile() {
     <label for="fileBackup" style="margin-top:14px">백업 파일 불러오기</label>
     <input type="file" id="fileBackup" accept=".json,application/json">
     <button class="btn secondary" style="margin-top:10px" onclick="importAppData()">백업 데이터 복원</button>
-    <button class="btn ghost danger" style="margin-top:16px" onclick="resetAllAppData()">현재 계정 초기화 (JSON 기본 대학으로 복구)</button>
+    <button class="btn ghost danger" style="margin-top:16px" onclick="resetAllAppData()">현재 계정 초기화 (기본 대학으로 복구)</button>
   ` : ''}
 
   <div class="tip-box" style="margin-top:16px">
-    💡 <strong>프로토타입 v2.6:</strong> data/universities.json 내 3개 계정(오버플로우·홍길동·편입생) 통합 관리, '요강안내' 탭 개편, 비로그인 보호 모드가 모두 적용되었습니다.
+    💡 <strong>Google Sheets API 연동 완료:</strong> 시트에서 계정 정보와 목표 대학 데이터를 실시간으로 읽고 저장합니다. PC에서 수정한 내역이 모바일에서도 동일하게 유지됩니다.
   </div>
 
   <!-- 설정 화면 하단 개인정보 처리약관 안내 -->
   <div class="privacy-terms-card">
     <h4>개인정보 처리방침 안내</h4>
     <p>1. <strong>수집 항목</strong>: 목표 대학 설정 내역, 전형별 체크리스트 상태, 사용자 입력 메모, 계정 식별자(아이디)</p>
-    <p>2. <strong>이용 목적</strong>: AI 비서 기반 편입 요강 맞춤 추천 및 학습 진도 저장, 다중 목표 대학 우선순위 관리</p>
-    <p>3. <strong>보유 및 이용 기간</strong>: 브라우저 캐시 삭제 또는 설정 메뉴 내 '현재 계정 초기화' 시 즉시 영구 파기</p>
+    <p>2. <strong>이용 목적</strong>: AI 비서 기반 편입 요강 맞춤 추천 및 클라우드 학습 진도 동기화, 다중 목표 대학 우선순위 관리</p>
+    <p>3. <strong>보유 및 이용 기간</strong>: 설정 메뉴 내 '현재 계정 초기화' 또는 연결된 시트 데이터 삭제 시 즉시 영구 파기</p>
     <p style="margin-top:6px;color:var(--ink-400)">본 서비스는 수험생의 학습 보조를 목적으로 하며, 사전 동의 없이 개인정보를 제3자에게 제공하거나 상업적 용도로 활용하지 않습니다.</p>
   </div>`;
 }
 
 function exportAppData() {
   if (!isLoggedIn()) return;
-  const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+  const exportObj = {
+    user: { id: appState.user.id, name: appState.user.name },
+    activeTargetIndex: appState.activeTargetIndex,
+    targets: appState.targets
+  };
+  const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `편입준비_백업_${appState.user.id}.json`;
@@ -1247,7 +1393,7 @@ function importAppData() {
         appState.activeTargetIndex = data.activeTargetIndex ?? 0;
         persist();
         navigateTo('home');
-        showToast('현재 계정에 데이터가 성공적으로 복원되었습니다.');
+        showToast('현재 계정에 데이터가 복원 및 시트에 동기화되었습니다.');
       } else {
         showToast('올바른 백업 파일 형식이 아닙니다.');
       }
@@ -1260,10 +1406,10 @@ function importAppData() {
 
 function resetAllAppData() {
   if (!isLoggedIn()) return;
-  if (confirm(`현재 '${appState.user.name}' 계정의 목표 대학과 체크 상태를 JSON 초기 상태로 되돌리시겠습니까?`)) {
+  if (confirm(`현재 '${appState.user.name}' 계정의 목표 대학과 체크 상태를 초기 상태로 되돌리시겠습니까?`)) {
     const uid = appState.user.id;
-    localStorage.removeItem(USER_STORAGE_PREFIX + uid);
-    appState = loadUserAccountState(uid);
+    appState.targets = cloneInitialTargets(uid);
+    appState.activeTargetIndex = 0;
     persist();
     navigateTo('home');
     showToast('현재 계정 데이터가 초기 상태로 복구되었습니다.');
@@ -1274,7 +1420,7 @@ document.querySelectorAll('.nav-tab-btn').forEach(btn => {
   btn.addEventListener('click', () => navigateTo(btn.dataset.page));
 });
 
-// 앱 최초 실행 시 data/universities.json(계정 정보 포함)을 비동기 로드한 후 세션 복원 및 화면 렌더링
+// 앱 최초 실행 시 data/universities.json을 비동기 로드한 후 세션 복원 및 Google Sheets 동기화 실행
 async function fetchUniversityData() {
   try {
     const response = await fetch('./data/universities.json');
@@ -1282,7 +1428,7 @@ async function fetchUniversityData() {
       UNIV_DATA = await response.json();
     }
   } catch (err) {
-    console.warn('로컬 환경 실행: 내장 대학 및 계정 데이터를 사용합니다.');
+    console.warn('로컬 환경 실행: 내장 대학 데이터를 사용합니다.');
   } finally {
     restoreSessionAfterJsonLoad();
     renderPresetAccountButtons();
