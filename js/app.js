@@ -1,4 +1,4 @@
-const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbyEkq7ZUIukeqsmeR0TJ4QP50opig9oSRPt76r8VYgBreX5gDb6N0Knyr8p5QCCFkTd/exec';
+const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbwsD0e-DHLpdI5nix1zTo4h08zPHnKONeXIXQAOLBGPE4nrJChJNVV19aeTsjwqLhs/exec';
 const SESSION_KEY = 'transfer_prep_active_session_v3';
 const USER_STORAGE_PREFIX = 'transfer_prep_user_';
 const UNIFIED_PW = '12345678';
@@ -346,7 +346,6 @@ async function pushStateToSheet() {
         targets: appState.targets
       }
     };
-    // Apps Script CORS 프리플라이트(OPTIONS) 우회를 위해 text/plain 헤더 사용
     const response = await fetch(SHEET_API_URL, {
       method: 'POST',
       redirect: 'follow',
@@ -395,7 +394,7 @@ async function refreshFromGoogleSheet() {
   }
 }
 
-function restoreSessionAfterJsonLoad() {
+function restoreSessionAfterInit() {
   try {
     const savedSession = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
     if (savedSession.currentUserId && savedSession.currentUserPw) {
@@ -476,9 +475,11 @@ function persist() {
 
 function showToast(msg = '저장되었습니다.') {
   const el = document.getElementById('toastMsg');
+  if (!el) return;
+  el.style.zIndex = '250';
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 1800);
+  setTimeout(() => el.classList.remove('show'), 2200);
 }
 
 function escapeHtml(s) {
@@ -556,6 +557,15 @@ async function processSheetLogin(rawId, pwInput) {
   try {
     const res = await fetchAccountFromSheet(queryId, pwInput);
     if (!res || !res.ok) {
+      if (preset && pwInput === preset.pw) {
+        appState = loadLocalCacheState(preset.id, preset.name, pwInput);
+        saveLocalOnly();
+        syncStatusText = '시트 행 미등록 (로컬 모드)';
+        closeLoginModal();
+        renderScreen();
+        showToast(`${preset.name} 로컬 모드로 로그인됨 (시트 행을 확인하세요)`);
+        return;
+      }
       showToast((res && res.message) ? res.message : '아이디 또는 비밀번호가 일치하지 않습니다.');
       return;
     }
@@ -592,8 +602,17 @@ async function processSheetLogin(rawId, pwInput) {
     renderScreen();
     showToast(`${userName} 계정으로 로그인되었습니다!`);
   } catch (err) {
-    console.error(err);
-    showToast('구글 시트 서버 연결에 실패했습니다. 네트워크 상태를 확인해 주세요.');
+    console.error('Google Sheets 연결 오류:', err);
+    if (preset && pwInput === preset.pw) {
+      appState = loadLocalCacheState(preset.id, preset.name, pwInput);
+      saveLocalOnly();
+      syncStatusText = '오프라인 로컬 모드 (시트 권한 확인 필요)';
+      closeLoginModal();
+      renderScreen();
+      showToast(`${preset.name} 로컬 모드로 로그인되었습니다.`);
+    } else {
+      showToast('구글 시트 연결 실패: 배포 권한(모든 사용자)을 확인해 주세요.');
+    }
   }
 }
 
@@ -1350,7 +1369,7 @@ function renderProfile() {
   ` : ''}
 
   <div class="tip-box" style="margin-top:16px">
-    💡 <strong>Google Sheets API 연동 완료:</strong> 시트에서 계정 정보와 목표 대학 데이터를 실시간으로 읽고 저장합니다. PC에서 수정한 내역이 모바일에서도 동일하게 유지됩니다.
+    💡 <strong>프로토타입 v2.8 (모듈 분리본):</strong> Google Sheets API 실시간 동기화, 3개 계정 독립 저장, '요강안내' 탭 개편, 비로그인 보호 모드가 모두 포함되어 있습니다.
   </div>
 
   <!-- 설정 화면 하단 개인정보 처리약관 안내 -->
@@ -1430,7 +1449,7 @@ async function fetchUniversityData() {
   } catch (err) {
     console.warn('로컬 환경 실행: 내장 대학 데이터를 사용합니다.');
   } finally {
-    restoreSessionAfterJsonLoad();
+    restoreSessionAfterInit();
     renderPresetAccountButtons();
     renderScreen();
   }
